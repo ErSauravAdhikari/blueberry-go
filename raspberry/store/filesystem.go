@@ -24,11 +24,53 @@ func NewFileSystemDB(baseDir string) (*FileSystemDB, error) {
 		return nil, err
 	}
 
-	return &FileSystemDB{
+	db := &FileSystemDB{
 		baseDir:          baseDir,
 		nextTaskRunID:    1,
 		nextTaskRunLogID: 1,
-	}, nil
+	}
+
+	// Initialize nextTaskRunID
+	taskRunDir := filepath.Join(baseDir, "task_runs")
+	if err := os.MkdirAll(taskRunDir, os.ModePerm); err != nil {
+		return nil, err
+	}
+
+	taskRunFiles, err := os.ReadDir(taskRunDir)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, file := range taskRunFiles {
+		if !file.IsDir() {
+			fileID, err := strconv.Atoi(file.Name()[:len(file.Name())-len(filepath.Ext(file.Name()))])
+			if err == nil && fileID >= db.nextTaskRunID {
+				db.nextTaskRunID = fileID + 1
+			}
+		}
+	}
+
+	// Initialize nextTaskRunLogID
+	logDir := filepath.Join(baseDir, "task_run_logs")
+	if err := os.MkdirAll(logDir, os.ModePerm); err != nil {
+		return nil, err
+	}
+
+	logFiles, err := os.ReadDir(logDir)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, file := range logFiles {
+		if !file.IsDir() {
+			fileID, err := strconv.Atoi(file.Name()[:len(file.Name())-len(filepath.Ext(file.Name()))])
+			if err == nil && fileID >= db.nextTaskRunLogID {
+				db.nextTaskRunLogID = fileID + 1
+			}
+		}
+	}
+
+	return db, nil
 }
 
 func (db *FileSystemDB) SaveTaskRun(ctx context.Context, taskRun *rasberry.TaskRun) error {

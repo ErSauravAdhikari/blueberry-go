@@ -12,34 +12,9 @@
             document.documentElement.classList.remove('dark')
         }
 
-        function cancelExecution(id) {
-            fetch(`/api/execution/${id}/cancel`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert('Error: ' + data.error);
-                    } else {
-                        alert('Execution cancelled successfully');
-                        location.reload(); // Reload the page to update the status
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while cancelling the execution.');
-                });
-        }
-
         function openModal(id) {
             document.getElementById('modal').classList.remove('hidden');
-            document.getElementById('confirmCancel').onclick = function() {
-                cancelExecution(id);
-                closeModal();
-            };
+            document.getElementById('cancelForm').action = `/execution/${id}/cancel`;
         }
 
         function closeModal() {
@@ -107,10 +82,12 @@
     <div class="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6 max-w-sm mx-auto">
         <h2 class="text-lg font-semibold mb-4 dark:text-white">Confirm Cancellation</h2>
         <p class="mb-4 dark:text-gray-300">Are you sure you want to cancel this task?</p>
-        <div class="flex justify-end">
-            <button onclick="closeModal()" class="px-4 py-2 mr-2 bg-gray-500 text-white rounded">No</button>
-            <button id="confirmCancel" class="px-4 py-2 bg-red-500 text-white rounded">Yes, Cancel</button>
-        </div>
+        <form id="cancelForm" method="POST" onsubmit="closeModal()">
+            <div class="flex justify-end">
+                <button type="button" onclick="closeModal()" class="px-4 py-2 mr-2 bg-gray-500 text-white rounded">No</button>
+                <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded">Yes, Cancel</button>
+            </div>
+        </form>
     </div>
 </div>
 

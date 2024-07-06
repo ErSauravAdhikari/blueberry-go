@@ -45,6 +45,7 @@ func (r *Raspberry) RunAPI(port string) {
 	web.GET("/", r.listTasks)
 	web.GET("/task/:name", r.showTask)
 	web.GET("/execution/:id", r.showExecution)
+	web.POST("/execution/:id/cancel", r.cancelExecutionByIDWeb)
 
 	// Register routes for the API with appropriate authentication
 	api := e.Group("/api")

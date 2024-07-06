@@ -2,6 +2,7 @@ package rasberry
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -132,4 +133,19 @@ func (r *Raspberry) showExecution(c echo.Context) error {
 	}
 
 	return c.Render(http.StatusOK, "execution.goml", data)
+}
+
+func (r *Raspberry) cancelExecutionByIDWeb(c echo.Context) error {
+	executionID := c.Param("id")
+	taskRunID, err := strconv.Atoi(executionID)
+	if err != nil {
+		return c.Render(http.StatusBadRequest, "error.html", map[string]string{"error": "Invalid execution ID"})
+	}
+
+	err = r.CancelExecutionByID(taskRunID)
+	if err != nil {
+		return c.Render(http.StatusNotFound, "error.html", map[string]string{"error": err.Error()})
+	}
+
+	return c.Redirect(http.StatusSeeOther, fmt.Sprintf("/execution/%d", taskRunID))
 }

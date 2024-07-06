@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Raspberry - Task Scheduler</title>
+</head>
+<body>
+    <h1>All Tasks</h1>
+    <ul>
+        {{range .}}
+        <li><a href="/task/{{.TaskName}}">{{.TaskName}}</a></li>
+        {{end}}
+    </ul>
+</body>
+</html>

@@ -110,7 +110,11 @@ func (r *Raspberry) storeSchedule(taskName string, scheduleInfo ScheduleInfo) {
 }
 
 func (r *Raspberry) getSchedules(taskName string) []ScheduleInfo {
-	loadedSchedules, _ := r.schedules.Load(taskName)
+	loadedSchedules, ok := r.schedules.Load(taskName)
+	if !ok {
+		return nil
+	}
+
 	schedules := loadedSchedules.([]ScheduleInfo)
 
 	for i := range schedules {

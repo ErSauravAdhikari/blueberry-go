@@ -3,6 +3,7 @@ package rasberry
 import (
 	_ "github.com/ersauravadhikari/raspberry-go/docs"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
@@ -20,10 +21,31 @@ import (
 // @Router / [get]
 func (r *Raspberry) RunAPI(port string) {
 	e := echo.New()
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 
-	e.GET("/api/tasks", r.getTasks)
-	e.GET("/api/task/:name/executions", r.getTaskExecutions)
-	e.GET("/api/task_run/:id/logs", r.getTaskRunLogs)
+	// Load templates
+	templates, err := loadTemplates()
+	if err != nil {
+		e.Logger.Fatal("Failed to load templates:", err)
+	}
+	e.Renderer = &Template{templates: templates}
+
+	// Serve static files
+	e.Static("/static", "static")
+
+	// Register routes for the API
+	api := e.Group("/api")
+	{
+		api.GET("/tasks", r.getTasks)
+		api.GET("/task/:name/executions", r.getTaskExecutions)
+		api.GET("/task_run/:id/logs", r.getTaskRunLogs)
+	}
+
+	// Register routes for the web UI
+	e.GET("/", r.listTasks)
+	e.GET("/task/:name", r.showTask)
+	e.GET("/execution/:id", r.showExecution)
 
 	// Swagger docs endpoint
 	e.GET("/swagger/*", echoSwagger.WrapHandler)

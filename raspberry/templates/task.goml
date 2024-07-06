@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{.TaskName}} - Raspberry</title>
+</head>
+<body>
+    <h1>Task: {{.TaskName}}</h1>
+    <h2>Schedules</h2>
+    <ul>
+        {{range .Schedules}}
+        <li>{{.Schedule}} (Next execution: {{.NextExecution}})</li>
+        {{end}}
+    </ul>
+    <h2>Past Executions</h2>
+    <ul>
+        {{range .Executions}}
+        <li><a href="/execution/{{.ID}}">{{.StartTime}} - {{.Status}}</a></li>
+        {{end}}
+    </ul>
+    <a href="/">Back to all tasks</a>
+</body>
+</html>

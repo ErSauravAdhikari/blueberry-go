@@ -101,15 +101,17 @@ rb := rasberry.NewRaspberryInstance(db)
 ```
 
 ##### 2.1 Authentication
-If you want to add authentication then you can call the add user function as
+If you want to add authentication then you can call the add auth function as
 
 ```go
-rb := rasberry.NewRaspberryInstance(db)
-
-rb.AddUser("admin", "password")
+// Add authentication
+rb.AddWebOnlyPasswordAuth("admin", "password")
+rb.AddAPIOnlyKeyAuth("your-api-key", "Main API Key")
 ```
 
 If no user has been added, the application GUI and API will be left open to all.
+
+Note: The authentication for web ui is handled via password auth using cookie and for api via api auth. Since each are handled independently you will need to provide both web auth and api auth params for them to be properly authenticated.
 
 #### 3. Register Tasks and Schedules
 
@@ -222,6 +224,9 @@ In this example, the task will run every day at midnight.
 
 ### GUI
 Raspberry offers an wonderful GUI (with both light and dark mode support).
+
+#### Login Page
+![Web Authentication Page](assets/gui/web_auth_page.png)
 
 #### Homepage (List all tasks)
 ![Homepage Dark Mode](assets/gui/homepage_dark.png)

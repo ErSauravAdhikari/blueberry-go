@@ -31,23 +31,31 @@ type Raspberry struct {
 	schedules sync.Map // To store schedules per task
 	executing sync.Map // To track currently executing tasks
 
-	users    map[string]string
-	usersMux sync.RWMutex
+	apiKeys          map[string]string
+	apiKeysMux       sync.RWMutex
+	usersMux         sync.RWMutex
+	webOnlyPasswords map[string]string
 }
 
 func NewRaspberryInstance(db DB) *Raspberry {
 	return &Raspberry{
-		db:    db,
-		cron:  cron.New(),
-		users: make(map[string]string),
+		db:               db,
+		cron:             cron.New(),
+		apiKeys:          make(map[string]string),
+		webOnlyPasswords: make(map[string]string),
 	}
 }
 
-// AddUser adds a new user to the Raspberry instance
-func (r *Raspberry) AddUser(username, password string) {
+func (r *Raspberry) AddWebOnlyPasswordAuth(username, password string) {
 	r.usersMux.Lock()
 	defer r.usersMux.Unlock()
-	r.users[username] = password
+	r.webOnlyPasswords[username] = password
+}
+
+func (r *Raspberry) AddAPIOnlyKeyAuth(apiKey, description string) {
+	r.apiKeysMux.Lock()
+	defer r.apiKeysMux.Unlock()
+	r.apiKeys[apiKey] = description
 }
 
 func (r *Raspberry) RegisterTask(taskName string, taskFunc func(context.Context, map[string]interface{}, *Logger) error) *Task {

@@ -187,4 +187,9 @@ paths:
       summary: Get all registered tasks and their schedules
       tags:
       - Task
+securityDefinitions:
+  ApiKeyAuth:
+    in: query
+    name: api_key
+    type: apiKey
 swagger: "2.0"

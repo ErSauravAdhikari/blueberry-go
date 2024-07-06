@@ -4,9 +4,44 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
+
+// Middleware to check cookie for web authentication
+func (r *Raspberry) WebAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		cookie, err := c.Cookie("auth")
+		if err != nil || cookie.Value != "authenticated" {
+			return c.Redirect(http.StatusFound, "/login")
+		}
+		return next(c)
+	}
+}
+
+// Serve the login page
+func (r *Raspberry) serveLoginPage(c echo.Context) error {
+	return c.Render(http.StatusOK, "login.goml", nil)
+}
+
+// Handle login form submission
+func (r *Raspberry) handleLogin(c echo.Context) error {
+	username := c.FormValue("username")
+	password := c.FormValue("password")
+
+	r.usersMux.RLock()
+	defer r.usersMux.RUnlock()
+	if pass, ok := r.webOnlyPasswords[username]; ok && pass == password {
+		cookie := new(http.Cookie)
+		cookie.Name = "auth"
+		cookie.Value = "authenticated"
+		cookie.Expires = time.Now().Add(24 * time.Hour)
+		c.SetCookie(cookie)
+		return c.Redirect(http.StatusFound, "/")
+	}
+	return c.Redirect(http.StatusFound, "/login")
+}
 
 // listTasks renders the index page with all tasks
 func (r *Raspberry) listTasks(c echo.Context) error {

@@ -7,6 +7,19 @@ import (
 	"strconv"
 )
 
+// APIKeyAuthMiddleware checks the API key for API authentication
+func (r *Raspberry) APIKeyAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		apiKey := c.QueryParam("api_key")
+		r.apiKeysMux.RLock()
+		defer r.apiKeysMux.RUnlock()
+		if _, ok := r.apiKeys[apiKey]; ok {
+			return next(c)
+		}
+		return echo.NewHTTPError(http.StatusUnauthorized, "invalid API key")
+	}
+}
+
 // getTasks returns all registered tasks and their schedules
 // @Summary Get all registered tasks and their schedules
 // @Description Get details of all registered tasks and their schedules

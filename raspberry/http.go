@@ -1,7 +1,6 @@
 package rasberry
 
 import (
-	"errors"
 	_ "github.com/ersauravadhikari/raspberry-go/docs"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -11,8 +10,10 @@ import (
 // @title Raspberry API
 // @version 1.0
 // @description This is a simple task scheduler API.
-
 // @BasePath /api/
+// @securityDefinitions.apiKey ApiKeyAuth
+// @in query
+// @name api_key
 
 // RunAPI starts the API server
 // @Summary Start API server
@@ -25,11 +26,6 @@ func (r *Raspberry) RunAPI(port string) {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	// Basic auth middleware
-	if len(r.users) > 0 {
-		e.Use(middleware.BasicAuth(r.AuthenticateUser))
-	}
-
 	// Load templates
 	templates, err := loadTemplates()
 	if err != nil {
@@ -37,32 +33,29 @@ func (r *Raspberry) RunAPI(port string) {
 	}
 	e.Renderer = &Template{templates: templates}
 
-	// Register routes for the API
-	api := e.Group("/api")
-	{
-		api.GET("/tasks", r.getTasks)
-		api.GET("/task/:name/executions", r.getTaskExecutions)
-		api.GET("/task_run/:id/logs", r.getTaskRunLogs)
-		api.POST("/execution/:id/cancel", r.cancelExecutionByID)
-	}
+	// Register routes for the login page and handler
+	e.GET("/login", r.serveLoginPage)
+	e.POST("/login", r.handleLogin)
 
-	// Register routes for the web UI
-	e.GET("/", r.listTasks)
-	e.GET("/task/:name", r.showTask)
-	e.GET("/execution/:id", r.showExecution)
+	// Register routes for the web UI with cookie-based authentication
+	web := e.Group("")
+
+	web.Use(r.WebAuthMiddleware)
+
+	web.GET("/", r.listTasks)
+	web.GET("/task/:name", r.showTask)
+	web.GET("/execution/:id", r.showExecution)
+
+	// Register routes for the API with appropriate authentication
+	api := e.Group("/api")
+	api.Use(r.APIKeyAuthMiddleware)
+	api.GET("/tasks", r.getTasks)
+	api.GET("/task/:name/executions", r.getTaskExecutions)
+	api.GET("/task_run/:id/logs", r.getTaskRunLogs)
+	api.POST("/execution/:id/cancel", r.cancelExecutionByID)
 
 	// Swagger docs endpoint
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	e.Logger.Fatal(e.Start(":" + port))
-}
-
-// AuthenticateUser checks the username and password for basic authentication
-func (r *Raspberry) AuthenticateUser(username, password string, c echo.Context) (bool, error) {
-	r.usersMux.RLock()
-	defer r.usersMux.RUnlock()
-	if pass, ok := r.users[username]; ok && pass == password {
-		return true, nil
-	}
-	return false, errors.New("invalid username or password")
 }

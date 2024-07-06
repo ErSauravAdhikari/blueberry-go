@@ -8,6 +8,7 @@ Raspberry is a task scheduler with a web GUI and an API, designed to make schedu
 ### Features
 
 - Web GUI for task management
+- Native authentication support (multi-user) via basic auth
 - Multi DB Support
   - SQLite
   - PostgreSQL
@@ -113,6 +114,17 @@ defer db.Close()
 
 rb := rasberry.NewRaspberryInstance(db)
 ```
+
+##### 2.1 Authentication
+If you want to add authentication then you can call the add user function as
+
+```go
+	rb := rasberry.NewRaspberryInstance(db)
+
+	rb.AddUser("admin", "password")
+```
+
+If no user has been added, the application GUI and API will be left open to all.
 
 #### 3. Register Tasks and Schedules
 

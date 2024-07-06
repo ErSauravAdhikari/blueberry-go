@@ -142,42 +142,72 @@ Initialize the task scheduler and start the API server to manage tasks and sched
 rb.InitTaskScheduler()
 rb.RunAPI("8080")
 ```
+### Predefined Run Configurations
 
-### Templated Run Configs
+Raspberry provides a set of predefined cron intervals to make scheduling tasks easier. These predefined configurations cover common intervals, specific times of day, and specific days of the week. You can also use custom cron expressions for more flexible scheduling.
 
-Raspberry provides a set of predefined cron intervals to make scheduling easier:
+#### Common Cron Intervals
+
+- **RunEveryMinute**: Executes the task every minute.
+- **RunEvery5Minutes**: Executes the task every 5 minutes.
+- **RunEvery10Minutes**: Executes the task every 10 minutes.
+- **RunEvery15Minutes**: Executes the task every 15 minutes.
+- **RunEvery30Minutes**: Executes the task every 30 minutes.
+- **RunEveryHour**: Executes the task every hour.
+- **RunEvery2Hours**: Executes the task every 2 hours.
+- **RunEvery3Hours**: Executes the task every 3 hours.
+- **RunEvery4Hours**: Executes the task every 4 hours.
+- **RunEvery6Hours**: Executes the task every 6 hours.
+- **RunEvery12Hours**: Executes the task every 12 hours.
+- **RunEveryDay**: Executes the task every 24 hours.
+- **RunEveryWeek**: Executes the task every 7 days (168 hours).
+
+#### Specific Times of Day
+
+- **RunAtMidnight**: Executes the task at midnight (00:00) every day.
+- **RunAtNoon**: Executes the task at noon (12:00) every day.
+- **RunAt6AM**: Executes the task at 6:00 AM every day.
+- **RunAt6PM**: Executes the task at 6:00 PM every day.
+
+#### Specific Days of the Week
+
+- **RunEveryMondayAtNoon**: Executes the task every Monday at noon (12:00).
+- **RunEveryFridayAtNoon**: Executes the task every Friday at noon (12:00).
+- **RunEverySundayAtMidnight**: Executes the task every Sunday at midnight (00:00).
+
+### Predefined Run Configurations
+To make it easier we have some predefined schedules you can use to run your tasks.
+
+Here is an example of showing you how to do this.
 
 ```go
-const (
-    // Common cron intervals
-    RunEveryMinute    = "@every 1m"
-    RunEvery5Minutes  = "@every 5m"
-    RunEvery10Minutes = "@every 10m"
-    RunEvery15Minutes = "@every 15m"
-    RunEvery30Minutes = "@every 30m"
-    RunEveryHour      = "@every 1h"
-    RunEvery2Hours    = "@every 2h"
-    RunEvery3Hours    = "@every 3h"
-    RunEvery4Hours    = "@every 4h"
-    RunEvery6Hours    = "@every 6h"
-    RunEvery12Hours   = "@every 12h"
-    RunEveryDay       = "@every 24h"
-    RunEveryWeek      = "@every 168h" // 7 * 24 hours
+// Register and schedule Task 1
+tsk1 := rb.RegisterTask("task_1", task1)
+if err := tsk1.RegisterSchedule(map[string]interface{}{"param1": "value1"}, rasberry.RunEveryMinute); err != nil {
+    log.Fatalf("Failed to register schedule: %v", err)
+}
 
-    // Specific time of day (example cron expressions)
-    RunAtMidnight = "0 0 * * *"
-    RunAtNoon     = "0 12 * * *"
-    RunAt6AM      = "0 6 * * *"
-    RunAt6PM      = "0 18 * * *"
-
-    // Specific days of the week
-    RunEveryMondayAtNoon     = "0 12 * * 1"
-    RunEveryFridayAtNoon     = "0 12 * * 5"
-    RunEverySundayAtMidnight = "0 0 * * 0"
-)
+// Register and schedule Task 2 with two different schedules
+tsk2 := rb.RegisterTask("task_2", task2)
+if err := tsk2.RegisterSchedule(map[string]interface{}{"param2": "value2"}, rasberry.RunEvery5Minutes); err != nil {
+    log.Fatalf("Failed to register schedule: %v", err)
+}
+if err := tsk2.RegisterSchedule(map[string]interface{}{"param2": "value3"}, rasberry.RunEvery10Minutes); err != nil {
+    log.Fatalf("Failed to register schedule: %v", err)
+}
 ```
 
-Custom cron expressions are also supported.
+### Custom Cron Expressions
+
+You can also use custom cron expressions to schedule tasks. Here’s how you can use a custom cron expression:
+
+```go
+if err := tsk1.RegisterSchedule(map[string]interface{}{"param1": "value1"}, "0 0 * * *"); err != nil {
+	log.Fatalf("Failed to register schedule: %v", err)
+}
+```
+
+In this example, the task will run every day at midnight.
 
 ### API
 

@@ -37,6 +37,7 @@ func (r *Raspberry) RunAPI(port string) {
 		api.GET("/tasks", r.getTasks)
 		api.GET("/task/:name/executions", r.getTaskExecutions)
 		api.GET("/task_run/:id/logs", r.getTaskRunLogs)
+		api.POST("/execution/:id/cancel", r.cancelExecutionByID)
 	}
 
 	// Register routes for the web UI

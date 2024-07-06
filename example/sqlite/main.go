@@ -5,6 +5,9 @@ import (
 	rasberry "github.com/ersauravadhikari/raspberry-go/raspberry"
 	"github.com/ersauravadhikari/raspberry-go/raspberry/store"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -13,7 +16,7 @@ func task1(ctx context.Context, params map[string]interface{}, logger *rasberry.
 		return err
 	}
 	select {
-	case <-time.After(10 * time.Second):
+	case <-time.After(10 * time.Minute):
 		if err := logger.Success("Task 1 completed successfully"); err != nil {
 			return err
 		}
@@ -25,6 +28,7 @@ func task1(ctx context.Context, params map[string]interface{}, logger *rasberry.
 		return ctx.Err()
 	}
 }
+
 func main() {
 	db, err := store.NewSQLiteDB("task_scheduler.db")
 	if err != nil {
@@ -46,6 +50,17 @@ func main() {
 	if err := tsk2.RegisterSchedule(map[string]interface{}{}, rasberry.RunEveryMinute); err != nil {
 		log.Fatalf("Failed to register schedule: %v", err)
 	}
+
+	// Handle system signals for graceful shutdown
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		sig := <-sigChan
+		log.Printf("Received signal: %v. Shutting down...", sig)
+		rb.Shutdown()
+		os.Exit(0)
+	}()
 
 	rb.InitTaskScheduler()
 	rb.RunAPI("8080")

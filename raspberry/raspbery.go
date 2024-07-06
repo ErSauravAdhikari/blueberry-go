@@ -20,6 +20,7 @@ type Task struct {
 	name      string
 	taskFunc  func(context.Context, map[string]interface{}, *Logger) error
 	raspberry *Raspberry
+	cancel    context.CancelFunc
 }
 
 type Raspberry struct {
@@ -28,6 +29,7 @@ type Raspberry struct {
 	tasks     sync.Map
 	taskMux   sync.Mutex
 	schedules sync.Map // To store schedules per task
+	executing sync.Map // To track currently executing tasks
 }
 
 func NewRaspberryInstance(db DB) *Raspberry {
@@ -59,18 +61,22 @@ func (t *Task) RegisterSchedule(params map[string]interface{}, schedule string) 
 			TaskName:  t.name,
 			StartTime: time.Now().UTC(),
 			Params:    params,
-			Status:    "started",
+			Status:    "status",
 		}
 
 		ctx, cancel := context.WithCancel(context.Background())
+		t.cancel = cancel
 		defer cancel()
 
-		// Log task start
 		err := t.raspberry.db.SaveTaskRun(ctx, taskRun)
 		if err != nil {
 			// Log the error but continue to run the task
 			fmt.Printf("Unable to log task start: %v\n", err)
 		}
+
+		// Track the executing task
+		t.raspberry.executing.Store(taskRun.ID, cancel)
+		defer t.raspberry.executing.Delete(taskRun.ID)
 
 		logger := &Logger{taskRun: taskRun, db: t.raspberry.db}
 		err = t.taskFunc(ctx, params, logger)
@@ -102,7 +108,6 @@ func (t *Task) RegisterSchedule(params map[string]interface{}, schedule string) 
 
 	return nil
 }
-
 func (r *Raspberry) storeSchedule(taskName string, scheduleInfo ScheduleInfo) {
 	schedules, _ := r.schedules.LoadOrStore(taskName, []ScheduleInfo{})
 	schedules = append(schedules.([]ScheduleInfo), scheduleInfo)
@@ -128,4 +133,46 @@ func (r *Raspberry) getSchedules(taskName string) []ScheduleInfo {
 
 func (r *Raspberry) InitTaskScheduler() {
 	r.cron.Start()
+}
+
+func (r *Raspberry) Shutdown() {
+	// Cancel all running tasks
+	r.executing.Range(func(key, value interface{}) bool {
+		executionID := key.(int)
+		cancel := value.(context.CancelFunc)
+		cancel()
+
+		// Log the cancellation to the database
+		taskRun, err := r.db.GetTaskRunByID(context.Background(), executionID)
+		if err == nil {
+			taskRun.Status = "cancelled"
+			taskRun.EndTime = time.Now().UTC()
+			_ = r.db.SaveTaskRun(context.Background(), taskRun)
+		}
+
+		return true
+	})
+}
+
+func (r *Raspberry) CancelExecutionByID(executionID int) error {
+	cancel, ok := r.executing.Load(executionID)
+	if !ok {
+		return fmt.Errorf("execution ID %d not found or already completed", executionID)
+	}
+
+	cancel.(context.CancelFunc)()
+
+	// Log the cancellation to the database
+	taskRun, err := r.db.GetTaskRunByID(context.Background(), executionID)
+	if err != nil {
+		return fmt.Errorf("failed to retrieve task run: %v", err)
+	}
+
+	taskRun.Status = "cancelled"
+	taskRun.EndTime = time.Now().UTC()
+	if err := r.db.SaveTaskRun(context.Background(), taskRun); err != nil {
+		return fmt.Errorf("failed to save task run: %v", err)
+	}
+
+	return nil
 }

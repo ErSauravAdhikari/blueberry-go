@@ -81,6 +81,33 @@ paths:
           schema:
             type: string
       summary: Start API server
+  /execution/{id}/cancel:
+    post:
+      description: Cancel a specific task execution by its ID
+      parameters:
+      - description: Task Execution ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            type: object
+      summary: Cancel a specific task execution by ID
+      tags:
+      - Executions
   /task/{name}/executions:
     get:
       description: Get all executions for a specific task by name

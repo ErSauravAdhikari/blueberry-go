@@ -28,6 +28,7 @@ type DB interface {
 	SaveTaskRun(ctx context.Context, taskRun *TaskRun) error
 	SaveTaskRunLog(ctx context.Context, taskRunLog *TaskRunLog) error
 	GetTaskRuns(ctx context.Context) ([]TaskRun, error)
+	GetTaskRunByID(ctx context.Context, id int) (*TaskRun, error)
 	GetTaskRunLogs(ctx context.Context, taskRunID int) ([]TaskRunLog, error)
 	GetPaginatedTaskRunLogs(ctx context.Context, taskRunID int, level string, page, size int) ([]TaskRunLog, error)
 	Close() error

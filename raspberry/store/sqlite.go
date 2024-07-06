@@ -76,6 +76,19 @@ func (db *SQLiteDB) SaveTaskRun(ctx context.Context, taskRun *rasberry.TaskRun) 
 	return nil
 }
 
+func (db *SQLiteDB) GetTaskRunByID(ctx context.Context, id int) (*rasberry.TaskRun, error) {
+	row := db.conn.QueryRowContext(ctx, "SELECT id, task_name, start_time, end_time, params, status FROM task_runs WHERE id = ?", id)
+	var taskRun rasberry.TaskRun
+	var params []byte
+	if err := row.Scan(&taskRun.ID, &taskRun.TaskName, &taskRun.StartTime, &taskRun.EndTime, &params, &taskRun.Status); err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(params, &taskRun.Params); err != nil {
+		return nil, err
+	}
+	return &taskRun, nil
+}
+
 func (db *SQLiteDB) SaveTaskRunLog(ctx context.Context, taskRunLog *rasberry.TaskRunLog) error {
 	result, err := db.conn.ExecContext(ctx,
 		"INSERT INTO task_run_logs (task_run_id, timestamp, level, message) VALUES (?, ?, ?, ?)",
@@ -92,7 +105,7 @@ func (db *SQLiteDB) SaveTaskRunLog(ctx context.Context, taskRunLog *rasberry.Tas
 }
 
 func (db *SQLiteDB) GetTaskRuns(ctx context.Context) ([]rasberry.TaskRun, error) {
-	rows, err := db.conn.QueryContext(ctx, "SELECT id, task_name, start_time, end_time, params, status FROM task_runs")
+	rows, err := db.conn.QueryContext(ctx, "SELECT id, task_name, start_time, end_time, params, status FROM task_runs ORDER BY start_time DESC")
 	if err != nil {
 		return nil, err
 	}

@@ -25,6 +25,47 @@
                 }
             }
         },
+        "/execution/{id}/cancel": {
+            "post": {
+                "description": "Cancel a specific task execution by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Executions"
+                ],
+                "summary": "Cancel a specific task execution by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task Execution ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
         "/task/{name}/executions": {
             "get": {
                 "description": "Get all executions for a specific task by name",

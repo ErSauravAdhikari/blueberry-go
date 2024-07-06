@@ -118,3 +118,28 @@ func (r *Raspberry) getTaskRunLogs(c echo.Context) error {
 		Logs: logs,
 	})
 }
+
+// CancelExecutionByID cancels a specific task execution by ID
+// @Summary Cancel a specific task execution by ID
+// @Description Cancel a specific task execution by its ID
+// @Param id path int true "Task Execution ID"
+// @Tags Executions
+// @Produce json
+// @Success 200 {object} object
+// @Failure 400 {object} object
+// @Failure 404 {object} object
+// @Router /execution/{id}/cancel [post]
+func (r *Raspberry) cancelExecutionByID(c echo.Context) error {
+	executionID := c.Param("id")
+	taskRunID, err := strconv.Atoi(executionID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid execution ID"})
+	}
+
+	err = r.CancelExecutionByID(taskRunID)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "Execution cancelled successfully"})
+}

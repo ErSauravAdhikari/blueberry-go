@@ -41,6 +41,7 @@ func main() {
 
 	// Use AddWebOnlyPasswordAuth for web login and AddAPIOnlyKeyAuth for API key auth
 	rb.AddWebOnlyPasswordAuth("admin", "password")
+	rb.AddWebOnlyPasswordAuth("admin1", "password1")
 	rb.AddAPIOnlyKeyAuth("your-api-key", "Main API Key")
 
 	tsk1 := rb.RegisterTask("task_1", task1)

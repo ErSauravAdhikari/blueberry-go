@@ -29,7 +29,7 @@ go get github.com/ersauravadhikari/raspberry-go
 
 ### Getting Started
 
-Below is an example script to demonstrate how to use Raspberry. You can find the full example in the [example/sqlite/main.go](https://github.com/ErSauravAdhikari/raspberry-go/blob/production/example/sqlite/main.go) file.
+Below is an example script to demonstrate how to use Raspberry. You can find the full example in the [example/filesystem/main.go](https://github.com/ErSauravAdhikari/raspberry-go/blob/production/example/filesystem/main.go) file.
 
 ### Example Usage
 
@@ -112,6 +112,16 @@ rb.AddAPIOnlyKeyAuth("your-api-key", "Main API Key")
 If no user has been added, the application GUI and API will be left open to all.
 
 Note: The authentication for web ui is handled via password auth using cookie and for api via api auth. Since each are handled independently you will need to provide both web auth and api auth params for them to be properly authenticated.
+
+You can add multiple users as well
+
+```go
+rb.AddWebOnlyPasswordAuth("admin", "password")
+rb.AddWebOnlyPasswordAuth("admin1", "password1")
+
+rb.AddAPIOnlyKeyAuth("your-api-key", "1st API Key")
+rb.AddAPIOnlyKeyAuth("your-api-key-1", "2nd API Key")
+```
 
 #### 3. Register Tasks and Schedules
 
@@ -270,7 +280,7 @@ To start the API server, use the `RunAPI` method provided by the Raspberry insta
 
 ### Full Example
 
-For a complete example of how to set up and use Raspberry, see the [full example](https://github.com/ErSauravAdhikari/raspberry-go/blob/production/example/sqlite/main.go) in the repository.
+For a complete example of how to set up and use Raspberry, see the [full example](https://github.com/ErSauravAdhikari/raspberry-go/blob/production/example/filesystem/main.go) in the repository.
 
 More examples are available under examples folder.
 

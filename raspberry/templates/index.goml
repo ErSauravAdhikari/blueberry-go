@@ -3,13 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <title>Raspberry - Task Scheduler</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-    <h1>All Tasks</h1>
-    <ul>
-        {{range .}}
-        <li><a href="/task/{{.TaskName}}">{{.TaskName}}</a></li>
-        {{end}}
-    </ul>
+<body class="bg-gray-100 text-gray-900">
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-4">All Tasks</h1>
+        <ul>
+            {{range .}}
+            <li class="mb-2">
+                <a href="/task/{{.TaskName}}" class="text-blue-500 hover:underline">{{.TaskName}}</a>
+                <ul class="ml-4">
+                    {{range .Schedules}}
+                    <li>
+                        <span class="text-sm text-gray-600">Schedule: {{.Schedule}}</span><br>
+                        <span class="text-sm text-gray-600">Next Scheduled At: {{.NextExecution}}</span>
+                    </li>
+                    {{end}}
+                </ul>
+            </li>
+            {{end}}
+        </ul>
+    </div>
 </body>
 </html>

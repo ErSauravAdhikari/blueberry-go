@@ -61,7 +61,7 @@ func (t *Task) RegisterSchedule(params map[string]interface{}, schedule string) 
 			TaskName:  t.name,
 			StartTime: time.Now().UTC(),
 			Params:    params,
-			Status:    "status",
+			Status:    "started",
 		}
 
 		ctx, cancel := context.WithCancel(context.Background())

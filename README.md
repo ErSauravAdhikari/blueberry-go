@@ -239,7 +239,7 @@ Raspberry offers an wonderful GUI (with both light and dark mode support).
 ![Logs Dark Mode](assets/gui/logger_cancel_modal_dark.png)
 
 #### Execution post cancellation
-![Logs Dark Mode](assets/gui/logger_cancel_modal_dark.png)
+![Logs Dark Mode](assets/gui/logger_post_cancel_dark.png)
 
 #### Light Mode
 ![Homepage Light Mode](assets/gui/homepage_light.png)

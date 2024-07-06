@@ -220,6 +220,8 @@ The API server provides endpoints to manage tasks and schedules. The API documen
 - **GET /api/task_run/:id/logs**: Get all logs for a specific task run.
 - **POST /api/execution/:id/cancel**: Cancel a specific task execution by ID.
 
+Note: Swagger based API docs are available after running the `rb.RunAPI("8080")` at `/swagger/index.html`
+
 #### Starting the API Server
 
 To start the API server, use the `RunAPI` method provided by the Raspberry instance. This method sets up the necessary routes and starts the server on the specified port.

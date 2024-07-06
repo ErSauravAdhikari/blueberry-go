@@ -28,8 +28,17 @@ Raspberry offers an wonderful GUI (with both light and dark mode support).
 #### List all schedules and execution for tasks
 ![Executions Dark Mode](assets/gui/executions_dark.png)
 
-#### View a given execution
+#### View a given execution Logs (Old)
 ![Logs Dark Mode](assets/gui/logs_dark.png)
+
+#### View a ongoing execution Logs (With cancel button)
+![Logs Dark Mode](assets/gui/logs_cancellation_dark.png)
+
+#### Execution cancellation modal
+![Logs Dark Mode](assets/gui/logger_cancel_modal_dark.png)
+
+#### Execution post cancellation
+![Logs Dark Mode](assets/gui/logger_cancel_modal_dark.png)
 
 #### Light Mode
 ![Homepage Light Mode](assets/gui/homepage_light.png)

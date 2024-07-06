@@ -8,7 +8,7 @@ Raspberry is a task scheduler with a web GUI and an API, designed to make schedu
 ### Features
 
 - Web GUI for task management
-- Native authentication support (multi-user) via basic auth
+- Native authentication support (multi-user) via cookie and API key (for web gui and for API)
 - Multi DB Support
   - SQLite
   - PostgreSQL

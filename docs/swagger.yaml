@@ -1,0 +1,163 @@
+basePath: /api/
+definitions:
+  rasberry.ScheduleInfo:
+    properties:
+      next_execution_ts:
+        type: integer
+      params:
+        additionalProperties: true
+        type: object
+      schedule:
+        type: string
+    type: object
+  rasberry.TaskExecution:
+    properties:
+      duration:
+        type: string
+      end_time:
+        type: string
+      id:
+        type: integer
+      params:
+        additionalProperties: true
+        type: object
+      start_time:
+        type: string
+      status:
+        type: string
+      task_name:
+        type: string
+    type: object
+  rasberry.TaskInfo:
+    properties:
+      schedules:
+        items:
+          $ref: '#/definitions/rasberry.ScheduleInfo'
+        type: array
+      task_name:
+        type: string
+    type: object
+  rasberry.TaskRunLog:
+    properties:
+      id:
+        type: integer
+      level:
+        type: string
+      message:
+        type: string
+      taskRunID:
+        type: integer
+      timestamp:
+        type: string
+    type: object
+  rasberry.getTaskExecutionsResponse:
+    properties:
+      task_executions:
+        items:
+          $ref: '#/definitions/rasberry.TaskExecution'
+        type: array
+    type: object
+  rasberry.getTaskRunLogResponse:
+    properties:
+      logs:
+        items:
+          $ref: '#/definitions/rasberry.TaskRunLog'
+        type: array
+    type: object
+info:
+  contact: {}
+  description: This is a simple task scheduler API.
+  title: Raspberry API
+  version: "1.0"
+paths:
+  /:
+    get:
+      description: Start the API server to manage tasks and schedules
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: API server started
+          schema:
+            type: string
+      summary: Start API server
+  /task/{name}/executions:
+    get:
+      description: Get all executions for a specific task by name
+      parameters:
+      - description: Task Name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/rasberry.getTaskExecutionsResponse'
+            type: array
+      summary: Get all executions for a specific task
+      tags:
+      - Executions
+  /task_run/{id}/logs:
+    get:
+      description: Get all logs for a specific task run by ID with pagination and
+        log level filtering
+      parameters:
+      - description: Task Run ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: info
+        description: Log level filter
+        enum:
+        - info
+        - debug
+        - error
+        - success
+        - all
+        in: query
+        name: level
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/rasberry.getTaskRunLogResponse'
+            type: array
+      summary: Get all logs for a specific task run
+      tags:
+      - Logs
+  /tasks:
+    get:
+      description: Get details of all registered tasks and their schedules
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/rasberry.TaskInfo'
+            type: array
+      summary: Get all registered tasks and their schedules
+      tags:
+      - Task
+swagger: "2.0"

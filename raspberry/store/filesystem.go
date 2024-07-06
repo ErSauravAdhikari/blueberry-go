@@ -44,11 +44,12 @@ func (db *FileSystemDB) SaveTaskRun(ctx context.Context, taskRun *rasberry.TaskR
 		return err
 	}
 
-	taskRunFile := filepath.Join(db.baseDir, "task_runs", strconv.Itoa(taskRun.ID)+".json")
-	if err := os.MkdirAll(filepath.Dir(taskRunFile), os.ModePerm); err != nil {
+	taskRunDir := filepath.Join(db.baseDir, "task_runs")
+	if err := os.MkdirAll(taskRunDir, os.ModePerm); err != nil {
 		return err
 	}
 
+	taskRunFile := filepath.Join(taskRunDir, strconv.Itoa(taskRun.ID)+".json")
 	return os.WriteFile(taskRunFile, data, 0644)
 }
 
@@ -63,11 +64,12 @@ func (db *FileSystemDB) SaveTaskRunLog(ctx context.Context, taskRunLog *rasberry
 		return err
 	}
 
-	logFile := filepath.Join(db.baseDir, "task_run_logs", strconv.Itoa(taskRunLog.TaskRunID)+".jsonl")
-	if err := os.MkdirAll(filepath.Dir(logFile), os.ModePerm); err != nil {
+	logDir := filepath.Join(db.baseDir, "task_run_logs")
+	if err := os.MkdirAll(logDir, os.ModePerm); err != nil {
 		return err
 	}
 
+	logFile := filepath.Join(logDir, strconv.Itoa(taskRunLog.TaskRunID)+".jsonl")
 	file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
@@ -83,6 +85,10 @@ func (db *FileSystemDB) GetTaskRuns(ctx context.Context) ([]rasberry.TaskRun, er
 	defer db.taskRunMutex.RUnlock()
 
 	taskRunDir := filepath.Join(db.baseDir, "task_runs")
+	if _, err := os.Stat(taskRunDir); os.IsNotExist(err) {
+		return nil, nil
+	}
+
 	files, err := os.ReadDir(taskRunDir)
 	if err != nil {
 		return nil, err
@@ -111,6 +117,10 @@ func (db *FileSystemDB) GetTaskRunLogs(ctx context.Context, taskRunID int) ([]ra
 	defer db.logMutex.RUnlock()
 
 	logFile := filepath.Join(db.baseDir, "task_run_logs", strconv.Itoa(taskRunID)+".jsonl")
+	if _, err := os.Stat(logFile); os.IsNotExist(err) {
+		return nil, nil
+	}
+
 	file, err := os.Open(logFile)
 	if err != nil {
 		return nil, err
@@ -163,6 +173,10 @@ func (db *FileSystemDB) GetTaskRunByID(ctx context.Context, id int) (*rasberry.T
 	defer db.taskRunMutex.RUnlock()
 
 	taskRunFile := filepath.Join(db.baseDir, "task_runs", strconv.Itoa(id)+".json")
+	if _, err := os.Stat(taskRunFile); os.IsNotExist(err) {
+		return nil, nil
+	}
+
 	data, err := os.ReadFile(taskRunFile)
 	if err != nil {
 		return nil, err

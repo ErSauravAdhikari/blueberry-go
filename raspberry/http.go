@@ -31,9 +31,6 @@ func (r *Raspberry) RunAPI(port string) {
 	}
 	e.Renderer = &Template{templates: templates}
 
-	// Serve static files
-	e.Static("/static", "static")
-
 	// Register routes for the API
 	api := e.Group("/api")
 	{

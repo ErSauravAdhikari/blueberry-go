@@ -3,26 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <title>Raspberry - Task Scheduler</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet"/>
+    <script>
+        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
 </head>
-<body class="bg-gray-100 text-gray-900">
-    <div class="container mx-auto p-4">
-        <h1 class="text-3xl font-bold mb-4">All Tasks</h1>
-        <ul>
+<body class="bg-gray-100 text-gray-900 dark:bg-gray-800">
+{{ template "navbar.goml" . }}
+<div class="container mx-auto p-4">
+    <h1 class="text-3xl font-bold mb-4 dark:text-gray-100">All Tasks</h1>
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+                <th scope="col" class="px-6 py-3">
+                    Task Name
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Schedule
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Next Run At
+                </th>
+            </tr>
+            </thead>
+            <tbody>
             {{range .}}
-            <li class="mb-2">
-                <a href="/task/{{.TaskName}}" class="text-blue-500 hover:underline">{{.TaskName}}</a>
-                <ul class="ml-4">
-                    {{range .Schedules}}
-                    <li>
-                        <span class="text-sm text-gray-600">Schedule: {{.Schedule}}</span><br>
-                        <span class="text-sm text-gray-600">Next Scheduled At: {{.NextExecution}}</span>
-                    </li>
-                    {{end}}
-                </ul>
-            </li>
+                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        <a href="/task/{{.TaskName}}" class="text-blue-500 hover:underline">{{.TaskName}}</a>
+                    </th>
+                    <td class="px-6 py-4">
+                        {{range .Schedules}}
+                            {{.Schedule}}
+                        {{end}}
+                    </td>
+                    <td class="px-6 py-4">
+                        {{range .Schedules}}
+                            {{.NextExecution}}
+                        {{end}}
+                    </td>
+                </tr>
             {{end}}
-        </ul>
+            </tbody>
+        </table>
     </div>
+</div>
+{{ template "scripts.goml" . }}
 </body>
 </html>

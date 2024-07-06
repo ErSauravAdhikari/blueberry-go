@@ -30,13 +30,24 @@ type Raspberry struct {
 	taskMux   sync.Mutex
 	schedules sync.Map // To store schedules per task
 	executing sync.Map // To track currently executing tasks
+
+	users    map[string]string
+	usersMux sync.RWMutex
 }
 
 func NewRaspberryInstance(db DB) *Raspberry {
 	return &Raspberry{
-		db:   db,
-		cron: cron.New(),
+		db:    db,
+		cron:  cron.New(),
+		users: make(map[string]string),
 	}
+}
+
+// AddUser adds a new user to the Raspberry instance
+func (r *Raspberry) AddUser(username, password string) {
+	r.usersMux.Lock()
+	defer r.usersMux.Unlock()
+	r.users[username] = password
 }
 
 func (r *Raspberry) RegisterTask(taskName string, taskFunc func(context.Context, map[string]interface{}, *Logger) error) *Task {

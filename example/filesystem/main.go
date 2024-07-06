@@ -39,6 +39,8 @@ func main() {
 
 	rb := rasberry.NewRaspberryInstance(db)
 
+	rb.AddUser("admin", "password")
+
 	tsk1 := rb.RegisterTask("task_1", task1)
 	if err := tsk1.RegisterSchedule(map[string]interface{}{"param1": "value1"}, "@every 1m"); err != nil {
 		log.Fatalf("Failed to register schedule: %v", err)

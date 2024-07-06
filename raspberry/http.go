@@ -1,6 +1,7 @@
 package rasberry
 
 import (
+	"errors"
 	_ "github.com/ersauravadhikari/raspberry-go/docs"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -23,6 +24,11 @@ func (r *Raspberry) RunAPI(port string) {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+
+	// Basic auth middleware
+	if len(r.users) > 0 {
+		e.Use(middleware.BasicAuth(r.AuthenticateUser))
+	}
 
 	// Load templates
 	templates, err := loadTemplates()
@@ -49,4 +55,14 @@ func (r *Raspberry) RunAPI(port string) {
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	e.Logger.Fatal(e.Start(":" + port))
+}
+
+// AuthenticateUser checks the username and password for basic authentication
+func (r *Raspberry) AuthenticateUser(username, password string, c echo.Context) (bool, error) {
+	r.usersMux.RLock()
+	defer r.usersMux.RUnlock()
+	if pass, ok := r.users[username]; ok && pass == password {
+		return true, nil
+	}
+	return false, errors.New("invalid username or password")
 }

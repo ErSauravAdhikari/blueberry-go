@@ -19,30 +19,6 @@ Raspberry is a task scheduler with a web GUI and an API, designed to make schedu
 - Graceful shutdown handling
 - Logging for task execution and status
 
-### GUI
-Raspberry offers an wonderful GUI (with both light and dark mode support).
-
-#### Homepage (List all tasks)
-![Homepage Dark Mode](assets/gui/homepage_dark.png)
-
-#### List all schedules and execution for tasks
-![Executions Dark Mode](assets/gui/executions_dark.png)
-
-#### View a given execution Logs (Old)
-![Logs Dark Mode](assets/gui/logs_dark.png)
-
-#### View a ongoing execution Logs (With cancel button)
-![Logs Dark Mode](assets/gui/logs_cancellation_dark.png)
-
-#### Execution cancellation modal
-![Logs Dark Mode](assets/gui/logger_cancel_modal_dark.png)
-
-#### Execution post cancellation
-![Logs Dark Mode](assets/gui/logger_cancel_modal_dark.png)
-
-#### Light Mode
-![Homepage Light Mode](assets/gui/homepage_light.png)
-
 ### Installation
 
 To install Raspberry, you need to have Go installed. Use the following command to get the Raspberry module:
@@ -212,9 +188,6 @@ Raspberry provides a set of predefined cron intervals to make scheduling tasks e
 - **RunEveryFridayAtNoon**: Executes the task every Friday at noon (12:00).
 - **RunEverySundayAtMidnight**: Executes the task every Sunday at midnight (00:00).
 
-### Predefined Run Configurations
-To make it easier we have some predefined schedules you can use to run your tasks.
-
 Here is an example of showing you how to do this.
 
 ```go
@@ -245,6 +218,31 @@ if err := tsk1.RegisterSchedule(map[string]interface{}{"param1": "value1"}, "0 0
 ```
 
 In this example, the task will run every day at midnight.
+
+
+### GUI
+Raspberry offers an wonderful GUI (with both light and dark mode support).
+
+#### Homepage (List all tasks)
+![Homepage Dark Mode](assets/gui/homepage_dark.png)
+
+#### List all schedules and execution for tasks
+![Executions Dark Mode](assets/gui/executions_dark.png)
+
+#### View a given execution Logs (Old)
+![Logs Dark Mode](assets/gui/logs_dark.png)
+
+#### View a ongoing execution Logs (With cancel button)
+![Logs Dark Mode](assets/gui/logs_cancellation_dark.png)
+
+#### Execution cancellation modal
+![Logs Dark Mode](assets/gui/logger_cancel_modal_dark.png)
+
+#### Execution post cancellation
+![Logs Dark Mode](assets/gui/logger_cancel_modal_dark.png)
+
+#### Light Mode
+![Homepage Light Mode](assets/gui/homepage_light.png)
 
 ### API
 

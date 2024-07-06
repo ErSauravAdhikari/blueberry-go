@@ -8,6 +8,11 @@ Raspberry is a task scheduler with a web GUI and an API, designed to make schedu
 ### Features
 
 - Web GUI for task management
+- Multi DB Support
+  - SQLite
+  - PostgreSQL
+  - MongoDB
+  - Memory (Temporary; logs gets deleted on restart)
 - RESTful API for integrating task management into other applications
 - Support for common cron intervals and custom cron expressions
 - Graceful shutdown handling
@@ -92,6 +97,17 @@ Set up the Raspberry instance with a database connection.
 db, err := store.NewSQLiteDB("task_scheduler.db")
 if err != nil {
     log.Fatalf("Failed to initialize SQLite: %v", err)
+}
+defer db.Close()
+
+rb := rasberry.NewRaspberryInstance(db)
+```
+
+For using postgresql
+```go
+db, err := store.NewPostgresDB("postgres://...(conn str)...")
+if err != nil {
+    log.Fatalf("Failed to initialize Postgresql: %v", err)
 }
 defer db.Close()
 
@@ -226,6 +242,91 @@ Note: Swagger based API docs are available after running the `rb.RunAPI("8080")`
 
 To start the API server, use the `RunAPI` method provided by the Raspberry instance. This method sets up the necessary routes and starts the server on the specified port.
 
+
+
 ### Full Example
 
 For a complete example of how to set up and use Raspberry, see the [full example](https://github.com/ErSauravAdhikari/raspberry-go/blob/production/example/sqlite/main.go) in the repository.
+
+More examples are available under examples folder.
+
+### Multi DB Support
+Raspberry supports multiple db types including in memory, sqlite, postgresql and mongodb. All of these are stored under the raspberry-go/raspberry/store package. Here is an example of using the in memory store engine.
+```go
+
+func main() {
+	db := store.NewInMemoryDB()
+	defer db.Close()
+
+	rb := rasberry.NewRaspberryInstance(db)
+
+	tsk1 := rb.RegisterTask("task_1", task1)
+	if err := tsk1.RegisterSchedule(map[string]interface{}{"param1": "value1"}, "@every 1m"); err != nil {
+		log.Fatalf("Failed to register schedule: %v", err)
+	}
+	if err := tsk1.RegisterSchedule(map[string]interface{}{"param1": "value2"}, "@every 5m"); err != nil {
+		log.Fatalf("Failed to register schedule: %v", err)
+	}
+
+	tsk2 := rb.RegisterTask("task_2", task1)
+	if err := tsk2.RegisterSchedule(map[string]interface{}{}, rasberry.RunEveryMinute); err != nil {
+		log.Fatalf("Failed to register schedule: %v", err)
+	}
+
+	// Handle system signals for graceful shutdown
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		sig := <-sigChan
+		log.Printf("Received signal: %v. Shutting down...", sig)
+		rb.Shutdown()
+		os.Exit(0)
+	}()
+
+	rb.InitTaskScheduler()
+	rb.RunAPI("8080")
+}
+```
+
+Here is the same example with mongodb as data source
+
+```go
+
+func main() {
+	mongoDB, err := store.NewMongoDB("mongodb://localhost:27017", "task_scheduler")
+	if err != nil {
+		log.Fatalf("Failed to initialize MongoDB: %v", err)
+	}
+	defer mongoDB.Close()
+
+	rb := rasberry.NewRaspberryInstance(mongoDB)
+
+	tsk1 := rb.RegisterTask("task_1", task1)
+	if err := tsk1.RegisterSchedule(map[string]interface{}{"param1": "value1"}, "@every 1m"); err != nil {
+		log.Fatalf("Failed to register schedule: %v", err)
+	}
+	if err := tsk1.RegisterSchedule(map[string]interface{}{"param1": "value2"}, "@every 5m"); err != nil {
+		log.Fatalf("Failed to register schedule: %v", err)
+	}
+
+	tsk2 := rb.RegisterTask("task_2", task1)
+	if err := tsk2.RegisterSchedule(map[string]interface{}{}, rasberry.RunEveryMinute); err != nil {
+		log.Fatalf("Failed to register schedule: %v", err)
+	}
+
+	// Handle system signals for graceful shutdown
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		sig := <-sigChan
+		log.Printf("Received signal: %v. Shutting down...", sig)
+		rb.Shutdown()
+		os.Exit(0)
+	}()
+
+	rb.InitTaskScheduler()
+	rb.RunAPI("8080")
+}
+```

@@ -119,9 +119,9 @@ rb := rasberry.NewRaspberryInstance(db)
 If you want to add authentication then you can call the add user function as
 
 ```go
-	rb := rasberry.NewRaspberryInstance(db)
+rb := rasberry.NewRaspberryInstance(db)
 
-	rb.AddUser("admin", "password")
+rb.AddUser("admin", "password")
 ```
 
 If no user has been added, the application GUI and API will be left open to all.

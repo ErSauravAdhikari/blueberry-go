@@ -134,6 +134,19 @@ func (db *PostgresDB) GetPaginatedTaskRunLogs(ctx context.Context, taskRunID int
 	return taskRunLogs, nil
 }
 
+func (db *PostgresDB) GetTaskRunByID(ctx context.Context, id int) (*rasberry.TaskRun, error) {
+	row := db.conn.QueryRow(ctx, "SELECT id, task_name, start_time, end_time, params, status FROM task_runs WHERE id = $1", id)
+	var taskRun rasberry.TaskRun
+	var params []byte
+	if err := row.Scan(&taskRun.ID, &taskRun.TaskName, &taskRun.StartTime, &taskRun.EndTime, &params, &taskRun.Status); err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(params, &taskRun.Params); err != nil {
+		return nil, err
+	}
+	return &taskRun, nil
+}
+
 func (db *PostgresDB) Close() error {
 	return db.conn.Close(context.Background())
 }

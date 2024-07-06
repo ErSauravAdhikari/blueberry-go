@@ -4,11 +4,13 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
-	rasberry "github.com/ersauravadhikari/raspberry-go/raspberry"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"sync"
+
+	rasberry "github.com/ersauravadhikari/raspberry-go/raspberry"
 )
 
 type FileSystemDB struct {
@@ -24,53 +26,11 @@ func NewFileSystemDB(baseDir string) (*FileSystemDB, error) {
 		return nil, err
 	}
 
-	db := &FileSystemDB{
+	return &FileSystemDB{
 		baseDir:          baseDir,
 		nextTaskRunID:    1,
 		nextTaskRunLogID: 1,
-	}
-
-	// Initialize nextTaskRunID
-	taskRunDir := filepath.Join(baseDir, "task_runs")
-	if err := os.MkdirAll(taskRunDir, os.ModePerm); err != nil {
-		return nil, err
-	}
-
-	taskRunFiles, err := os.ReadDir(taskRunDir)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, file := range taskRunFiles {
-		if !file.IsDir() {
-			fileID, err := strconv.Atoi(file.Name()[:len(file.Name())-len(filepath.Ext(file.Name()))])
-			if err == nil && fileID >= db.nextTaskRunID {
-				db.nextTaskRunID = fileID + 1
-			}
-		}
-	}
-
-	// Initialize nextTaskRunLogID
-	logDir := filepath.Join(baseDir, "task_run_logs")
-	if err := os.MkdirAll(logDir, os.ModePerm); err != nil {
-		return nil, err
-	}
-
-	logFiles, err := os.ReadDir(logDir)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, file := range logFiles {
-		if !file.IsDir() {
-			fileID, err := strconv.Atoi(file.Name()[:len(file.Name())-len(filepath.Ext(file.Name()))])
-			if err == nil && fileID >= db.nextTaskRunLogID {
-				db.nextTaskRunLogID = fileID + 1
-			}
-		}
-	}
-
-	return db, nil
+	}, nil
 }
 
 func (db *FileSystemDB) SaveTaskRun(ctx context.Context, taskRun *rasberry.TaskRun) error {
@@ -151,6 +111,12 @@ func (db *FileSystemDB) GetTaskRuns(ctx context.Context) ([]rasberry.TaskRun, er
 			taskRuns = append(taskRuns, taskRun)
 		}
 	}
+
+	// Sort taskRuns by ID
+	sort.Slice(taskRuns, func(i, j int) bool {
+		return taskRuns[i].ID > taskRuns[j].ID
+	})
+
 	return taskRuns, nil
 }
 
@@ -182,6 +148,12 @@ func (db *FileSystemDB) GetTaskRunLogs(ctx context.Context, taskRunID int) ([]ra
 	if err := scanner.Err(); err != nil {
 		return nil, err
 	}
+
+	// Sort taskRunLogs by ID
+	sort.Slice(taskRunLogs, func(i, j int) bool {
+		return taskRunLogs[i].ID > taskRunLogs[j].ID
+	})
+
 	return taskRunLogs, nil
 }
 
@@ -197,6 +169,11 @@ func (db *FileSystemDB) GetPaginatedTaskRunLogs(ctx context.Context, taskRunID i
 			filteredLogs = append(filteredLogs, log)
 		}
 	}
+
+	// Sort filteredLogs by ID
+	sort.Slice(filteredLogs, func(i, j int) bool {
+		return filteredLogs[i].ID > filteredLogs[j].ID
+	})
 
 	start := (page - 1) * size
 	if start >= len(filteredLogs) {

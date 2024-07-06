@@ -38,7 +38,7 @@ go get github.com/ersauravadhikari/raspberry-go
 
 ### Getting Started
 
-Below is an example script to demonstrate how to use Raspberry. You can find the full example in the [example/sqlite/main.go](https://github.com/ErSauravAdhikari/raspberry-go/tree/main/example/sqlite/main.go) file.
+Below is an example script to demonstrate how to use Raspberry. You can find the full example in the [example/sqlite/main.go](https://github.com/ErSauravAdhikari/raspberry-go/blob/production/example/sqlite/main.go) file.
 
 ### Example Usage
 
@@ -228,4 +228,4 @@ To start the API server, use the `RunAPI` method provided by the Raspberry insta
 
 ### Full Example
 
-For a complete example of how to set up and use Raspberry, see the [full example](https://github.com/ErSauravAdhikari/raspberry-go/tree/main/example/sqlite/main.go) in the repository.
+For a complete example of how to set up and use Raspberry, see the [full example](https://github.com/ErSauravAdhikari/raspberry-go/blob/production/example/sqlite/main.go) in the repository.

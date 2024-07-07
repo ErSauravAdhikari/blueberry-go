@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	rasberry "github.com/ersauravadhikari/raspberry-go/raspberry"
 	"github.com/ersauravadhikari/raspberry-go/raspberry/store"
 	"log"
@@ -11,7 +12,17 @@ import (
 	"time"
 )
 
-func task1(ctx context.Context, params map[string]interface{}, logger *rasberry.Logger) error {
+var (
+	task1Schema = rasberry.NewTaskSchema(rasberry.TaskParamDefinition{
+		"param1": rasberry.TypeString,
+		"param2": rasberry.TypeInt,
+		"param3": rasberry.TypeBool,
+	})
+)
+
+func task1(ctx context.Context, params rasberry.TaskParams, logger *rasberry.Logger) error {
+	_ = logger.Info(fmt.Sprintf("The params are: %v", params))
+
 	if err := logger.Info("Starting Task 1"); err != nil {
 		return err
 	}
@@ -38,17 +49,27 @@ func main() {
 
 	rb := rasberry.NewRaspberryInstance(db)
 
-	tsk1 := rb.RegisterTask("task_1", task1)
-	if err := tsk1.RegisterSchedule(map[string]interface{}{"param1": "value1"}, "@every 1m"); err != nil {
-		log.Fatalf("Failed to register schedule: %v", err)
+	tsk1, err := rb.RegisterTask("task_1", task1, task1Schema)
+	if err != nil {
+		fmt.Printf("Failed to register task: %v\n", err)
+		return
 	}
-	if err := tsk1.RegisterSchedule(map[string]interface{}{"param1": "value2"}, "@every 5m"); err != nil {
+
+	if err := tsk1.RegisterSchedule(rasberry.TaskParams{
+		"param1": "value1",
+		"param2": 1,
+		"param3": true,
+	}, "@every 1m"); err != nil {
 		log.Fatalf("Failed to register schedule: %v", err)
 	}
 
-	tsk2 := rb.RegisterTask("task_2", task1)
-	if err := tsk2.RegisterSchedule(map[string]interface{}{}, rasberry.RunEveryMinute); err != nil {
-		log.Fatalf("Failed to register schedule: %v", err)
+	err = tsk1.ExecuteNow(context.Background(), rasberry.TaskParams{
+		"param1": "value1",
+		"param2": 1,
+		"param3": true,
+	})
+	if err != nil {
+		log.Fatalf("Unable to execute right now")
 	}
 
 	// Handle system signals for graceful shutdown

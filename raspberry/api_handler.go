@@ -7,8 +7,8 @@ import (
 	"strconv"
 )
 
-// APIKeyAuthMiddleware checks the API key for API authentication
-func (r *Raspberry) APIKeyAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+// apiKeyAuthMiddleware checks the API key for API authentication
+func (r *Raspberry) apiKeyAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		apiKey := c.QueryParam("api_key")
 		r.apiKeysMux.RLock()
@@ -157,7 +157,7 @@ func (r *Raspberry) cancelExecutionByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{"message": "Execution cancelled successfully"})
 }
 
-// ExecuteTaskByName handles the execution of a task by its name
+// executeTaskByName handles the execution of a task by its name
 // @Summary Execute a task by name
 // @Description Execute a specified task by its name with the provided parameters
 // @Accept json
@@ -170,7 +170,7 @@ func (r *Raspberry) cancelExecutionByID(c echo.Context) error {
 // @Failure 500 {object} ErrorResponse "Internal server error"
 // @Router /task/{name}/execute [post]
 // @Security ApiKeyAuth
-func (r *Raspberry) ExecuteTaskByName(c echo.Context) error {
+func (r *Raspberry) executeTaskByName(c echo.Context) error {
 	taskName := c.Param("name")
 	var req ExecuteTaskRequest
 

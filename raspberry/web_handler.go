@@ -37,7 +37,7 @@ func formatUnixTimestamp(timestamp int64) string {
 }
 
 // Middleware to check cookie for web authentication
-func (r *Raspberry) WebAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+func (r *Raspberry) webAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		cookie, err := c.Cookie("auth")
 		if err != nil || cookie.Value != "authenticated" {
@@ -203,8 +203,8 @@ func (r *Raspberry) cancelExecutionByIDWeb(c echo.Context) error {
 	return c.Redirect(http.StatusSeeOther, fmt.Sprintf("/execution/%d", taskRunID))
 }
 
-// ExecuteTaskForm renders the form for executing a task
-func (r *Raspberry) ExecuteTaskForm(c echo.Context) error {
+// executeTaskForm renders the form for executing a task
+func (r *Raspberry) executeTaskForm(c echo.Context) error {
 	taskName := c.Param("name")
 	taskInterface, ok := r.tasks.Load(taskName)
 	if !ok {
@@ -224,8 +224,8 @@ func (r *Raspberry) ExecuteTaskForm(c echo.Context) error {
 	return c.Render(http.StatusOK, "task_run.goml", data)
 }
 
-// HandleExecuteTask processes the form submission to execute a task
-func (r *Raspberry) HandleExecuteTask(c echo.Context) error {
+// handleExecuteTask processes the form submission to execute a task
+func (r *Raspberry) handleExecuteTask(c echo.Context) error {
 	taskName := c.Param("name")
 	taskInterface, ok := r.tasks.Load(taskName)
 	if !ok {

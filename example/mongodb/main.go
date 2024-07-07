@@ -69,14 +69,15 @@ func main() {
 		log.Fatalf("Failed to register schedule: %v", err)
 	}
 
-	_, err = tsk1.ExecuteNow(rasberry.TaskParams{
-		"param1": "value1",
-		"param2": 1,
-		"param3": true,
-	})
-	if err != nil {
-		log.Fatalf("Unable to execute right now")
-	}
+	// Can be executed directly from code without the scheduler as well
+	//_, err = tsk1.ExecuteNow(rasberry.TaskParams{
+	//	"param1": "value1",
+	//	"param2": 1,
+	//	"param3": true,
+	//})
+	//if err != nil {
+	//	return
+	//}
 
 	// Handle system signals for graceful shutdown
 	sigChan := make(chan os.Signal, 1)

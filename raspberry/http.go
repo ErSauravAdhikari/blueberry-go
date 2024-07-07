@@ -41,13 +41,13 @@ func (r *Raspberry) RunAPI(port string) {
 	web := e.Group("")
 
 	if len(r.webOnlyPasswords) > 0 {
-		web.Use(r.WebAuthMiddleware)
+		web.Use(r.webAuthMiddleware)
 	}
 
 	web.GET("/", r.listTasks)
 	web.GET("/task/:name", r.showTask)
-	web.GET("/task/:name/run", r.ExecuteTaskForm)
-	web.POST("/task/:name/execute", r.HandleExecuteTask)
+	web.GET("/task/:name/run", r.executeTaskForm)
+	web.POST("/task/:name/execute", r.handleExecuteTask)
 	web.GET("/execution/:id", r.showExecution)
 	web.POST("/execution/:id/cancel", r.cancelExecutionByIDWeb)
 
@@ -55,14 +55,14 @@ func (r *Raspberry) RunAPI(port string) {
 	api := e.Group("/api")
 
 	if len(r.apiKeys) > 0 {
-		api.Use(r.APIKeyAuthMiddleware)
+		api.Use(r.apiKeyAuthMiddleware)
 	}
 
 	api.GET("/tasks", r.getTasks)
 	api.GET("/task/:name/executions", r.getTaskExecutions)
 	api.GET("/task_run/:id/logs", r.getTaskRunLogs)
 	api.POST("/execution/:id/cancel", r.cancelExecutionByID)
-	api.POST("/task/:name/execute", r.ExecuteTaskByName)
+	api.POST("/task/:name/execute", r.executeTaskByName)
 
 	// Swagger docs endpoint
 	e.GET("/swagger/*", echoSwagger.WrapHandler)

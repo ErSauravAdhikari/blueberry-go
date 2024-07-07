@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/gommon/log"
 	"html/template"
 	"io"
+	"time"
 )
 
 //go:embed templates/*.goml
@@ -31,10 +32,23 @@ func sub(a, b int) int {
 	return a - b
 }
 
+// Format datetime to a readable string
+func formatDateTime(t time.Time) string {
+	return t.Format("2006-01-02 15:04:05")
+}
+
+// Format Unix timestamp to a readable string
+func formatTimestamp(timestamp int64) string {
+	return time.Unix(timestamp, 0).Format("2006-01-02 15:04:05")
+}
+
+// loadTemplates loads and parses the templates with additional functions
 func loadTemplates() (*template.Template, error) {
 	t := template.Must(template.New("").Funcs(template.FuncMap{
-		"add": add,
-		"sub": sub,
+		"add":             add,
+		"sub":             sub,
+		"formatDateTime":  formatDateTime,
+		"formatTimestamp": formatTimestamp,
 	}).ParseFS(content, "templates/*.goml"))
 
 	return t, nil

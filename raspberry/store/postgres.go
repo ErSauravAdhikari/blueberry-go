@@ -90,6 +90,36 @@ func (db *PostgresDB) GetTaskRuns(ctx context.Context) ([]rasberry.TaskRun, erro
 	return taskRuns, nil
 }
 
+func (db *PostgresDB) GetPaginatedTaskRunsForTaskName(ctx context.Context, name string, page, limit int) ([]rasberry.TaskRun, error) {
+	offset := (page - 1) * limit
+	rows, err := db.conn.Query(ctx, "SELECT id, task_name, start_time, end_time, params, status FROM task_runs WHERE task_name = $1 ORDER BY start_time DESC LIMIT $2 OFFSET $3", name, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var taskRuns []rasberry.TaskRun
+	for rows.Next() {
+		var taskRun rasberry.TaskRun
+		var params []byte
+		if err := rows.Scan(&taskRun.ID, &taskRun.TaskName, &taskRun.StartTime, &taskRun.EndTime, &params, &taskRun.Status); err != nil {
+			return nil, err
+		}
+		json.Unmarshal(params, &taskRun.Params)
+		taskRuns = append(taskRuns, taskRun)
+	}
+	return taskRuns, nil
+}
+
+func (db *PostgresDB) GetTaskRunsCountForTaskName(ctx context.Context, name string) (int, error) {
+	var count int
+	err := db.conn.QueryRow(ctx, "SELECT COUNT(*) FROM task_runs WHERE task_name = $1", name).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 func (db *PostgresDB) GetTaskRunLogs(ctx context.Context, taskRunID int) ([]rasberry.TaskRunLog, error) {
 	rows, err := db.conn.Query(ctx, "SELECT id, task_run_id, timestamp, level, message FROM task_run_logs WHERE task_run_id = $1", taskRunID)
 	if err != nil {

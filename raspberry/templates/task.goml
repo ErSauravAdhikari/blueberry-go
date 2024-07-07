@@ -18,7 +18,8 @@
 <div class="container mx-auto p-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-4xl font-bold">Task: {{.TaskName}}</h1>
-        <a href="/task/{{.TaskName}}/run" class="text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Run</a>
+        <a href="/task/{{.TaskName}}/run"
+           class="text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Run</a>
     </div>
     <section class="mb-6">
         <h2 class="text-2xl font-semibold mb-4">Schedules</h2>
@@ -56,9 +57,16 @@
                 {{range .Executions}}
                     <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                         <td class="px-6 py-4">
-                            <a href="/execution/{{.ID}}" class="text-blue-500 hover:underline">{{.FormattedStartTime}}</a>
+                            <a href="/execution/{{.ID}}"
+                               class="text-blue-500 hover:underline">{{.FormattedStartTime}}</a>
                         </td>
-                        <td class="px-6 py-4">{{.FormattedEndTime}}</td>
+                        <td class="px-6 py-4">
+                            {{ if ne .Status "started" }}
+                                {{.FormattedEndTime}}
+                            {{ else }}
+                                -
+                            {{end}}
+                        </td>
                         <td class="px-6 py-4">
                                 <span class="{{if eq .Status "completed"}}text-green-500 dark:text-green-400{{else if eq .Status "failed"}}text-red-500 dark:text-red-400{{else}}text-gray-700 dark:text-gray-300{{end}}">
                                     {{.Status}}

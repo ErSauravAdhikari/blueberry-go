@@ -98,36 +98,23 @@ func (r *Raspberry) showTask(c echo.Context) error {
 	if err != nil || page < 1 {
 		page = 1
 	}
-	offset := (page - 1) * tasksPerPage
 
 	schedules := r.getSchedules(taskName)
 	if schedules == nil {
 		schedules = []ScheduleInfo{}
 	}
 
-	executions, err := r.db.GetTaskRuns(context.Background())
+	paginatedTasks, err := r.db.GetPaginatedTaskRunsForTaskName(context.Background(), taskName, page, tasksPerPage)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	var taskExecutions []TaskRun
-	for _, execution := range executions {
-		if execution.TaskName == taskName {
-			taskExecutions = append(taskExecutions, execution)
-		}
+	totalTasks, err := r.db.GetTaskRunsCountForTaskName(context.Background(), taskName)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	totalTasks := len(taskExecutions)
 	totalPages := (totalTasks + tasksPerPage - 1) / tasksPerPage
-	start := offset
-	end := offset + tasksPerPage
-	if start > totalTasks {
-		start = totalTasks
-	}
-	if end > totalTasks {
-		end = totalTasks
-	}
-	paginatedTasks := taskExecutions[start:end]
 
 	var templateSchedules []TemplateScheduleInfo
 	for _, schedule := range schedules {

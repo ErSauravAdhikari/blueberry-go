@@ -80,6 +80,33 @@ func (db *MongoDB) GetTaskRuns(ctx context.Context) ([]rasberry.TaskRun, error) 
 	return taskRuns, nil
 }
 
+func (db *MongoDB) GetPaginatedTaskRunsForTaskName(ctx context.Context, name string, page, limit int) ([]rasberry.TaskRun, error) {
+	skip := (page - 1) * limit
+	cursor, err := db.taskRuns.Find(ctx, bson.M{"task_name": name}, options.Find().SetSort(bson.M{"start_time": -1}).SetSkip(int64(skip)).SetLimit(int64(limit)))
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var taskRuns []rasberry.TaskRun
+	for cursor.Next(ctx) {
+		var taskRun rasberry.TaskRun
+		if err := cursor.Decode(&taskRun); err != nil {
+			return nil, err
+		}
+		taskRuns = append(taskRuns, taskRun)
+	}
+	return taskRuns, nil
+}
+
+func (db *MongoDB) GetTaskRunsCountForTaskName(ctx context.Context, name string) (int, error) {
+	count, err := db.taskRuns.CountDocuments(ctx, bson.M{"task_name": name})
+	if err != nil {
+		return 0, err
+	}
+	return int(count), nil
+}
+
 func (db *MongoDB) GetTaskRunLogs(ctx context.Context, taskRunID int) ([]rasberry.TaskRunLog, error) {
 	filter := bson.M{"task_run_id": taskRunID}
 	cursor, err := db.taskRunLogs.Find(ctx, filter)

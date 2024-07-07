@@ -129,6 +129,41 @@ func (db *SQLiteDB) GetTaskRuns(ctx context.Context) ([]rasberry.TaskRun, error)
 	return taskRuns, nil
 }
 
+func (db *SQLiteDB) GetPaginatedTaskRunsForTaskName(ctx context.Context, name string, page, limit int) ([]rasberry.TaskRun, error) {
+	offset := (page - 1) * limit
+	rows, err := db.conn.QueryContext(ctx, "SELECT id, task_name, start_time, end_time, params, status FROM task_runs WHERE task_name = ? ORDER BY start_time DESC LIMIT ? OFFSET ?", name, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var taskRuns []rasberry.TaskRun
+	for rows.Next() {
+		var taskRun rasberry.TaskRun
+		var params []byte
+		if err := rows.Scan(&taskRun.ID, &taskRun.TaskName, &taskRun.StartTime, &taskRun.EndTime, &params, &taskRun.Status); err != nil {
+			return nil, err
+		}
+		json.Unmarshal(params, &taskRun.Params)
+		taskRuns = append(taskRuns, taskRun)
+	}
+
+	if taskRuns == nil {
+		return []rasberry.TaskRun{}, nil
+	}
+
+	return taskRuns, nil
+}
+
+func (db *SQLiteDB) GetTaskRunsCountForTaskName(ctx context.Context, name string) (int, error) {
+	var count int
+	err := db.conn.QueryRowContext(ctx, "SELECT COUNT(*) FROM task_runs WHERE task_name = ?", name).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 func (db *SQLiteDB) GetTaskRunLogs(ctx context.Context, taskRunID int) ([]rasberry.TaskRunLog, error) {
 	rows, err := db.conn.QueryContext(ctx, "SELECT id, task_run_id, timestamp, level, message FROM task_run_logs WHERE task_run_id = ?", taskRunID)
 	if err != nil {

@@ -45,7 +45,7 @@
                     </td>
                     <td class="px-6 py-4">
                         {{range .Schedules}}
-                            {{.NextExecution}}
+                            {{.NextExecution | formatTimestamp }}
                         {{end}}
                     </td>
                 </tr>

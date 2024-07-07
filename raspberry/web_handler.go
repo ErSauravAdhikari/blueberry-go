@@ -205,9 +205,11 @@ func (r *Raspberry) HandleExecuteTask(c echo.Context) error {
 		}
 	}
 
-	if err := task.ExecuteNow(params); err != nil {
+	taskID, err := task.ExecuteNow(params)
+
+	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.Redirect(http.StatusFound, "/task/"+task.name)
+	return c.Redirect(http.StatusFound, fmt.Sprintf("/execution/%d", taskID))
 }

@@ -272,11 +272,7 @@ const docTemplate = `{
         },
         "rasberry.GenericResponse": {
             "type": "object",
-            "properties": {
-                "body": {
-                    "type": "string"
-                }
-            }
+            "additionalProperties": true
         },
         "rasberry.ScheduleInfo": {
             "type": "object",

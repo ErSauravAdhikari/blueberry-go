@@ -36,6 +36,4 @@ type ErrorResponse struct {
 	Reason string `json:"reason"`
 }
 
-type GenericResponse struct {
-	Body string `json:"body"`
-}
+type GenericResponse map[string]interface{}

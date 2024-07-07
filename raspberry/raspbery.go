@@ -221,27 +221,27 @@ func (t *Task) RegisterSchedule(params TaskParams, schedule string) error {
 	return nil
 }
 
-func (t *Task) ExecuteNow(params TaskParams) error {
+func (t *Task) ExecuteNow(params TaskParams) (int, error) {
 	if err := t.ValidateParams(params); err != nil {
-		return err
+		return 0, err
 	}
 
-	go func(params TaskParams) {
+	taskRun := &TaskRun{
+		TaskName:  t.name,
+		StartTime: time.Now().UTC(),
+		Params:    params,
+		Status:    "started",
+	}
+
+	err := t.raspberry.db.SaveTaskRun(context.Background(), taskRun)
+	if err != nil {
+		fmt.Printf("unable to log task start: %v\n", err)
+		return 0, err
+	}
+
+	go func(taskRun *TaskRun, params TaskParams) {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
-
-		taskRun := &TaskRun{
-			TaskName:  t.name,
-			StartTime: time.Now().UTC(),
-			Params:    params,
-			Status:    "started",
-		}
-
-		err := t.raspberry.db.SaveTaskRun(ctx, taskRun)
-		if err != nil {
-			fmt.Printf("unable to log task start: %v\n", err)
-			return
-		}
 
 		t.raspberry.executing.Store(taskRun.ID, cancel)
 		defer t.raspberry.executing.Delete(taskRun.ID)
@@ -260,9 +260,9 @@ func (t *Task) ExecuteNow(params TaskParams) error {
 		if err != nil {
 			_ = logger.Error("Unable to save task run due to: " + err.Error())
 		}
-	}(params)
+	}(taskRun, params)
 
-	return nil
+	return taskRun.ID, nil
 }
 
 func (r *Raspberry) storeSchedule(taskName string, scheduleInfo ScheduleInfo) {

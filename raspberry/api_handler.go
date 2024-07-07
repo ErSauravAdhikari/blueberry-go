@@ -197,7 +197,8 @@ func (r *Raspberry) ExecuteTaskByName(c echo.Context) error {
 		})
 	}
 
-	if err := task.ExecuteNow(req.Params); err != nil {
+	taskID, err := task.ExecuteNow(req.Params)
+	if err != nil {
 		return c.JSON(http.StatusInternalServerError, ErrorResponse{
 			"system",
 			err.Error(),
@@ -205,6 +206,6 @@ func (r *Raspberry) ExecuteTaskByName(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, GenericResponse{
-		"Task scheduled to run @now successfully",
+		"execution_id": taskID,
 	})
 }

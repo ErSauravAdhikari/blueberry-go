@@ -13,9 +13,7 @@ definitions:
         $ref: '#/definitions/rasberry.TaskParams'
     type: object
   rasberry.GenericResponse:
-    properties:
-      body:
-        type: string
+    additionalProperties: true
     type: object
   rasberry.ScheduleInfo:
     properties:

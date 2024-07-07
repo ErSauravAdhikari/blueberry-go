@@ -37,7 +37,7 @@ func formatUnixTimestamp(timestamp int64) string {
 }
 
 // Middleware to check cookie for web authentication
-func (r *Raspberry) webAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+func (r *BlueBerry) webAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		cookie, err := c.Cookie("auth")
 		if err != nil || cookie.Value != "authenticated" {
@@ -48,12 +48,12 @@ func (r *Raspberry) webAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 // Serve the login page
-func (r *Raspberry) serveLoginPage(c echo.Context) error {
+func (r *BlueBerry) serveLoginPage(c echo.Context) error {
 	return c.Render(http.StatusOK, "login.goml", nil)
 }
 
 // Handle login form submission
-func (r *Raspberry) handleLogin(c echo.Context) error {
+func (r *BlueBerry) handleLogin(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 
@@ -71,7 +71,7 @@ func (r *Raspberry) handleLogin(c echo.Context) error {
 }
 
 // listTasks renders the index page with all tasks
-func (r *Raspberry) listTasks(c echo.Context) error {
+func (r *BlueBerry) listTasks(c echo.Context) error {
 	var tasks []TaskInfo
 
 	r.tasks.Range(func(key, value interface{}) bool {
@@ -92,7 +92,7 @@ func (r *Raspberry) listTasks(c echo.Context) error {
 }
 
 // showTask renders the task page with its schedules and past executions
-func (r *Raspberry) showTask(c echo.Context) error {
+func (r *BlueBerry) showTask(c echo.Context) error {
 	taskName := c.Param("name")
 	page, err := strconv.Atoi(c.QueryParam("page"))
 	if err != nil || page < 1 {
@@ -152,7 +152,7 @@ func (r *Raspberry) showTask(c echo.Context) error {
 }
 
 // showExecution renders the execution page with its logs
-func (r *Raspberry) showExecution(c echo.Context) error {
+func (r *BlueBerry) showExecution(c echo.Context) error {
 	executionID := c.Param("id")
 	taskRunID, err := strconv.Atoi(executionID)
 	if err != nil {
@@ -188,7 +188,7 @@ func (r *Raspberry) showExecution(c echo.Context) error {
 	return c.Render(http.StatusOK, "execution.goml", data)
 }
 
-func (r *Raspberry) cancelExecutionByIDWeb(c echo.Context) error {
+func (r *BlueBerry) cancelExecutionByIDWeb(c echo.Context) error {
 	executionID := c.Param("id")
 	taskRunID, err := strconv.Atoi(executionID)
 	if err != nil {
@@ -204,7 +204,7 @@ func (r *Raspberry) cancelExecutionByIDWeb(c echo.Context) error {
 }
 
 // executeTaskForm renders the form for executing a task
-func (r *Raspberry) executeTaskForm(c echo.Context) error {
+func (r *BlueBerry) executeTaskForm(c echo.Context) error {
 	taskName := c.Param("name")
 	taskInterface, ok := r.tasks.Load(taskName)
 	if !ok {
@@ -225,7 +225,7 @@ func (r *Raspberry) executeTaskForm(c echo.Context) error {
 }
 
 // handleExecuteTask processes the form submission to execute a task
-func (r *Raspberry) handleExecuteTask(c echo.Context) error {
+func (r *BlueBerry) handleExecuteTask(c echo.Context) error {
 	taskName := c.Param("name")
 	taskInterface, ok := r.tasks.Load(taskName)
 	if !ok {

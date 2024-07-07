@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	rasberry "github.com/ersauravadhikari/raspberry-go/raspberry"
-	"github.com/ersauravadhikari/raspberry-go/raspberry/store"
+	rasberry "github.com/ersauravadhikari/raspberry-go/blueberry"
+	"github.com/ersauravadhikari/raspberry-go/blueberry/store"
 	"log"
 	"os"
 	"os/signal"

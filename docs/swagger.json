@@ -2,7 +2,7 @@
     "swagger": "2.0",
     "info": {
         "description": "This is a simple task scheduler API.",
-        "title": "Raspberry API",
+        "title": "BlueBerry API",
         "contact": {},
         "version": "1.0"
     },

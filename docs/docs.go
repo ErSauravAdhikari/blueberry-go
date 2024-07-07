@@ -392,7 +392,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "/api/",
 	Schemes:          []string{},
-	Title:            "Raspberry API",
+	Title:            "BlueBerry API",
 	Description:      "This is a simple task scheduler API.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

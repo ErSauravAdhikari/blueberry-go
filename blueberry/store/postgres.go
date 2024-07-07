@@ -3,7 +3,7 @@ package store
 import (
 	"context"
 	"encoding/json"
-	rasberry "github.com/ersauravadhikari/raspberry-go/raspberry"
+	rasberry "github.com/ersauravadhikari/raspberry-go/blueberry"
 	"github.com/jackc/pgx/v4"
 )
 

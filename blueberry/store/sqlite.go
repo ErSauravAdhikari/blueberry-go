@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	rasberry "github.com/ersauravadhikari/raspberry-go/raspberry"
+	rasberry "github.com/ersauravadhikari/raspberry-go/blueberry"
 	_ "github.com/mattn/go-sqlite3"
 )
 

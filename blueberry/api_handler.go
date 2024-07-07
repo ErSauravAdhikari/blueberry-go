@@ -8,7 +8,7 @@ import (
 )
 
 // apiKeyAuthMiddleware checks the API key for API authentication
-func (r *Raspberry) apiKeyAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+func (r *BlueBerry) apiKeyAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		apiKey := c.QueryParam("api_key")
 		r.apiKeysMux.RLock()
@@ -27,7 +27,7 @@ func (r *Raspberry) apiKeyAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc
 // @Produce json
 // @Success 200 {array} TaskInfo
 // @Router /tasks [get]
-func (r *Raspberry) getTasks(c echo.Context) error {
+func (r *BlueBerry) getTasks(c echo.Context) error {
 	var tasks []TaskInfo
 
 	r.tasks.Range(func(key, value interface{}) bool {
@@ -52,7 +52,7 @@ func (r *Raspberry) getTasks(c echo.Context) error {
 // @Produce json
 // @Success 200 {array} getTaskExecutionsResponse
 // @Router /task/{name}/executions [get]
-func (r *Raspberry) getTaskExecutions(c echo.Context) error {
+func (r *BlueBerry) getTaskExecutions(c echo.Context) error {
 	taskName := c.Param("name")
 	taskRuns, err := r.db.GetTaskRuns(context.Background())
 	if err != nil {
@@ -100,7 +100,7 @@ func (r *Raspberry) getTaskExecutions(c echo.Context) error {
 // @Produce json
 // @Success 200 {array} getTaskRunLogResponse
 // @Router /task_run/{id}/logs [get]
-func (r *Raspberry) getTaskRunLogs(c echo.Context) error {
+func (r *BlueBerry) getTaskRunLogs(c echo.Context) error {
 	runID := c.Param("id")
 	taskRunID, err := strconv.Atoi(runID)
 	if err != nil {
@@ -142,7 +142,7 @@ func (r *Raspberry) getTaskRunLogs(c echo.Context) error {
 // @Failure 400 {object} object
 // @Failure 404 {object} object
 // @Router /execution/{id}/cancel [post]
-func (r *Raspberry) cancelExecutionByID(c echo.Context) error {
+func (r *BlueBerry) cancelExecutionByID(c echo.Context) error {
 	executionID := c.Param("id")
 	taskRunID, err := strconv.Atoi(executionID)
 	if err != nil {
@@ -170,7 +170,7 @@ func (r *Raspberry) cancelExecutionByID(c echo.Context) error {
 // @Failure 500 {object} ErrorResponse "Internal server error"
 // @Router /task/{name}/execute [post]
 // @Security ApiKeyAuth
-func (r *Raspberry) executeTaskByName(c echo.Context) error {
+func (r *BlueBerry) executeTaskByName(c echo.Context) error {
 	taskName := c.Param("name")
 	var req ExecuteTaskRequest
 

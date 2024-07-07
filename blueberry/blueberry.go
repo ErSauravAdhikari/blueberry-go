@@ -45,11 +45,11 @@ type ScheduleInfo struct {
 type Task struct {
 	name      string
 	taskFunc  func(context.Context, TaskParams, *Logger) error
-	raspberry *Raspberry
+	raspberry *BlueBerry
 	schema    TaskSchema
 }
 
-type Raspberry struct {
+type BlueBerry struct {
 	db        DB
 	cron      *cron.Cron
 	tasks     sync.Map
@@ -63,8 +63,8 @@ type Raspberry struct {
 	webOnlyPasswords map[string]string
 }
 
-func NewRaspberryInstance(db DB) *Raspberry {
-	return &Raspberry{
+func NewRaspberryInstance(db DB) *BlueBerry {
+	return &BlueBerry{
 		db:               db,
 		cron:             cron.New(),
 		apiKeys:          make(map[string]string),
@@ -72,19 +72,19 @@ func NewRaspberryInstance(db DB) *Raspberry {
 	}
 }
 
-func (r *Raspberry) AddWebOnlyPasswordAuth(username, password string) {
+func (r *BlueBerry) AddWebOnlyPasswordAuth(username, password string) {
 	r.usersMux.Lock()
 	defer r.usersMux.Unlock()
 	r.webOnlyPasswords[username] = password
 }
 
-func (r *Raspberry) AddAPIOnlyKeyAuth(apiKey, description string) {
+func (r *BlueBerry) AddAPIOnlyKeyAuth(apiKey, description string) {
 	r.apiKeysMux.Lock()
 	defer r.apiKeysMux.Unlock()
 	r.apiKeys[apiKey] = description
 }
 
-func (r *Raspberry) RegisterTask(taskName string, taskFunc func(context.Context, TaskParams, *Logger) error, schema TaskSchema) (*Task, error) {
+func (r *BlueBerry) RegisterTask(taskName string, taskFunc func(context.Context, TaskParams, *Logger) error, schema TaskSchema) (*Task, error) {
 	if err := validateSchema(schema); err != nil {
 		return nil, err
 	}
@@ -265,13 +265,13 @@ func (t *Task) ExecuteNow(params TaskParams) (int, error) {
 	return taskRun.ID, nil
 }
 
-func (r *Raspberry) storeSchedule(taskName string, scheduleInfo ScheduleInfo) {
+func (r *BlueBerry) storeSchedule(taskName string, scheduleInfo ScheduleInfo) {
 	schedules, _ := r.schedules.LoadOrStore(taskName, []ScheduleInfo{})
 	schedules = append(schedules.([]ScheduleInfo), scheduleInfo)
 	r.schedules.Store(taskName, schedules)
 }
 
-func (r *Raspberry) getSchedules(taskName string) []ScheduleInfo {
+func (r *BlueBerry) getSchedules(taskName string) []ScheduleInfo {
 	loadedSchedules, ok := r.schedules.Load(taskName)
 	if !ok {
 		return nil
@@ -288,11 +288,11 @@ func (r *Raspberry) getSchedules(taskName string) []ScheduleInfo {
 	return schedules
 }
 
-func (r *Raspberry) InitTaskScheduler() {
+func (r *BlueBerry) InitTaskScheduler() {
 	r.cron.Start()
 }
 
-func (r *Raspberry) Shutdown() {
+func (r *BlueBerry) Shutdown() {
 	// Cancel all running tasks
 	r.executing.Range(func(key, value interface{}) bool {
 		executionID := key.(int)
@@ -311,7 +311,7 @@ func (r *Raspberry) Shutdown() {
 	})
 }
 
-func (r *Raspberry) CancelExecutionByID(executionID int) error {
+func (r *BlueBerry) CancelExecutionByID(executionID int) error {
 	cancel, ok := r.executing.Load(executionID)
 	if !ok {
 		return fmt.Errorf("execution ID %d not found or already completed", executionID)

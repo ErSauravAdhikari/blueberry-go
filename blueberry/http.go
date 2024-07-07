@@ -7,7 +7,7 @@ import (
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
-// @title Raspberry API
+// @title BlueBerry API
 // @version 1.0
 // @description This is a simple task scheduler API.
 // @BasePath /api/
@@ -21,7 +21,7 @@ import (
 // @Produce json
 // @Success 200 {object} string "API server started"
 // @Router / [get]
-func (r *Raspberry) RunAPI(port string) {
+func (r *BlueBerry) RunAPI(port string) {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())

@@ -1,4 +1,4 @@
-package rasberry
+package blueberry
 
 const (
 	// Common cron intervals

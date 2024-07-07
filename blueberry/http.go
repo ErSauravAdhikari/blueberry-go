@@ -1,4 +1,4 @@
-package rasberry
+package blueberry
 
 import (
 	_ "github.com/ersauravadhikari/blueberry-go/docs"

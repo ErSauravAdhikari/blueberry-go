@@ -10,6 +10,32 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// TemplateScheduleInfo is used for rendering schedules in the template
+type TemplateScheduleInfo struct {
+	Schedule               string
+	FormattedNextExecution string
+}
+
+// TemplateTaskRun is used for rendering task runs in the template
+type TemplateTaskRun struct {
+	ID                 int
+	FormattedStartTime string
+	FormattedEndTime   string
+	Status             string
+}
+
+const tasksPerPage = 20
+
+// formatTime formats a given time.Time to a readable string
+func formatTime(t time.Time) string {
+	return t.Format("2006-01-02 15:04:05")
+}
+
+// formatUnixTimestamp formats a given Unix timestamp to a readable string
+func formatUnixTimestamp(timestamp int64) string {
+	return time.Unix(timestamp, 0).Format("2006-01-02 15:04:05")
+}
+
 // Middleware to check cookie for web authentication
 func (r *Raspberry) WebAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
@@ -68,6 +94,12 @@ func (r *Raspberry) listTasks(c echo.Context) error {
 // showTask renders the task page with its schedules and past executions
 func (r *Raspberry) showTask(c echo.Context) error {
 	taskName := c.Param("name")
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+	offset := (page - 1) * tasksPerPage
+
 	schedules := r.getSchedules(taskName)
 	if schedules == nil {
 		schedules = []ScheduleInfo{}
@@ -85,14 +117,48 @@ func (r *Raspberry) showTask(c echo.Context) error {
 		}
 	}
 
+	totalTasks := len(taskExecutions)
+	totalPages := (totalTasks + tasksPerPage - 1) / tasksPerPage
+	start := offset
+	end := offset + tasksPerPage
+	if start > totalTasks {
+		start = totalTasks
+	}
+	if end > totalTasks {
+		end = totalTasks
+	}
+	paginatedTasks := taskExecutions[start:end]
+
+	var templateSchedules []TemplateScheduleInfo
+	for _, schedule := range schedules {
+		templateSchedules = append(templateSchedules, TemplateScheduleInfo{
+			Schedule:               schedule.Schedule,
+			FormattedNextExecution: formatUnixTimestamp(schedule.NextExecution),
+		})
+	}
+
+	var templateTaskRuns []TemplateTaskRun
+	for _, execution := range paginatedTasks {
+		templateTaskRuns = append(templateTaskRuns, TemplateTaskRun{
+			ID:                 execution.ID,
+			FormattedStartTime: formatTime(execution.StartTime),
+			FormattedEndTime:   formatTime(execution.EndTime),
+			Status:             execution.Status,
+		})
+	}
+
 	data := struct {
 		TaskName   string
-		Schedules  []ScheduleInfo
-		Executions []TaskRun
+		Schedules  []TemplateScheduleInfo
+		Executions []TemplateTaskRun
+		Page       int
+		TotalPages int
 	}{
 		TaskName:   taskName,
-		Schedules:  schedules,
-		Executions: taskExecutions,
+		Schedules:  templateSchedules,
+		Executions: templateTaskRuns,
+		Page:       page,
+		TotalPages: totalPages,
 	}
 
 	return c.Render(http.StatusOK, "task.goml", data)

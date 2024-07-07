@@ -6,7 +6,6 @@ import (
 	"github.com/labstack/gommon/log"
 	"html/template"
 	"io"
-	"time"
 )
 
 //go:embed templates/*.goml
@@ -24,16 +23,19 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 	return err
 }
 
-func loadTemplates() (*template.Template, error) {
-	t := template.New("").Funcs(template.FuncMap{
-		"date": func(t time.Time) string {
-			return t.Format("02-Jan-2006")
-		},
-	})
+func add(a, b int) int {
+	return a + b
+}
 
-	t, err := template.ParseFS(content, "templates/*.goml")
-	if err != nil {
-		return nil, err
-	}
+func sub(a, b int) int {
+	return a - b
+}
+
+func loadTemplates() (*template.Template, error) {
+	t := template.Must(template.New("").Funcs(template.FuncMap{
+		"add": add,
+		"sub": sub,
+	}).ParseFS(content, "templates/*.goml"))
+
 	return t, nil
 }

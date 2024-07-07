@@ -49,6 +49,12 @@ func main() {
 
 	rb := rasberry.NewRaspberryInstance(db)
 
+	rb.AddWebOnlyPasswordAuth("admin", "password")
+	rb.AddWebOnlyPasswordAuth("admin1", "password1")
+
+	rb.AddAPIOnlyKeyAuth("key1", "Super Key 01")
+	rb.AddAPIOnlyKeyAuth("key2", "Super Key 02")
+
 	tsk1, err := rb.RegisterTask("task_1", task1, task1Schema)
 	if err != nil {
 		fmt.Printf("Failed to register task: %v\n", err)

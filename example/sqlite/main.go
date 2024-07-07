@@ -96,6 +96,7 @@ func main() {
 		sig := <-sigChan
 		log.Printf("Received signal: %v. Shutting down...", sig)
 		rb.Shutdown()
+		db.Close()
 		os.Exit(0)
 	}()
 

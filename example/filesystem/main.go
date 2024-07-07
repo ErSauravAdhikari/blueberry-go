@@ -41,13 +41,13 @@ func task1(ctx context.Context, params rasberry.TaskParams, logger *rasberry.Log
 }
 
 func main() {
-	mongoDB, err := store.NewMongoDB("mongodb://localhost:27017", "task_scheduler")
+	db, err := store.NewFileStoreDB("data")
 	if err != nil {
-		log.Fatalf("Failed to initialize MongoDB: %v", err)
+		log.Fatalf("Failed to initialize Filesystem DB: %v", err)
 	}
-	defer mongoDB.Close()
+	defer db.Close()
 
-	rb := rasberry.NewBlueBerryInstance(mongoDB)
+	rb := rasberry.NewBlueBerryInstance(db)
 
 	rb.AddWebOnlyPasswordAuth("admin", "password")
 	rb.AddWebOnlyPasswordAuth("admin1", "password1")
@@ -87,7 +87,7 @@ func main() {
 		sig := <-sigChan
 		log.Printf("Received signal: %v. Shutting down...", sig)
 		rb.Shutdown()
-		mongoDB.Close()
+		db.Close()
 		os.Exit(0)
 	}()
 

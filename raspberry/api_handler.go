@@ -156,3 +156,56 @@ func (r *Raspberry) cancelExecutionByID(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]string{"message": "Execution cancelled successfully"})
 }
+
+// ExecuteTaskByName handles the execution of a task by its name
+// @Summary Execute a task by name
+// @Description Execute a specified task by its name with the provided parameters
+// @Accept json
+// @Produce json
+// @Param name path string true "Task Name"
+// @Param params body ExecuteTaskRequest true "Task Parameters"
+// @Success 200 {object} GenericResponse "Task executed successfully"
+// @Failure 400 {object} ErrorResponse "Invalid parameters"
+// @Failure 404 {object} ErrorResponse "Task not found"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router /task/{name}/execute [post]
+// @Security ApiKeyAuth
+func (r *Raspberry) ExecuteTaskByName(c echo.Context) error {
+	taskName := c.Param("name")
+	var req ExecuteTaskRequest
+
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, ErrorResponse{
+			"validation",
+			err.Error(),
+		})
+	}
+
+	taskInterface, ok := r.tasks.Load(taskName)
+	if !ok {
+		return c.JSON(http.StatusNotFound, ErrorResponse{
+			"user",
+			"Invalid task name",
+		})
+	}
+
+	task := taskInterface.(*Task)
+	if err := task.ValidateParams(req.Params); err != nil {
+		return c.JSON(http.StatusBadRequest, ErrorResponse{
+			"validation",
+			err.Error(),
+		})
+	}
+
+	ctx := c.Request().Context()
+	if err := task.ExecuteNow(ctx, req.Params); err != nil {
+		return c.JSON(http.StatusInternalServerError, ErrorResponse{
+			"system",
+			err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, GenericResponse{
+		"Task scheduled to run @now successfully",
+	})
+}

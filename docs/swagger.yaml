@@ -1,5 +1,22 @@
 basePath: /api/
 definitions:
+  rasberry.ErrorResponse:
+    properties:
+      reason:
+        type: string
+      type:
+        type: string
+    type: object
+  rasberry.ExecuteTaskRequest:
+    properties:
+      params:
+        $ref: '#/definitions/rasberry.TaskParams'
+    type: object
+  rasberry.GenericResponse:
+    properties:
+      body:
+        type: string
+    type: object
   rasberry.ScheduleInfo:
     properties:
       next_execution_ts:
@@ -36,6 +53,9 @@ definitions:
         type: array
       task_name:
         type: string
+    type: object
+  rasberry.TaskParams:
+    additionalProperties: true
     type: object
   rasberry.TaskRunLog:
     properties:
@@ -108,6 +128,45 @@ paths:
       summary: Cancel a specific task execution by ID
       tags:
       - Executions
+  /task/{name}/execute:
+    post:
+      consumes:
+      - application/json
+      description: Execute a specified task by its name with the provided parameters
+      parameters:
+      - description: Task Name
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Task Parameters
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/rasberry.ExecuteTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task executed successfully
+          schema:
+            $ref: '#/definitions/rasberry.GenericResponse'
+        "400":
+          description: Invalid parameters
+          schema:
+            $ref: '#/definitions/rasberry.ErrorResponse'
+        "404":
+          description: Task not found
+          schema:
+            $ref: '#/definitions/rasberry.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/rasberry.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Execute a task by name
   /task/{name}/executions:
     get:
       description: Get all executions for a specific task by name

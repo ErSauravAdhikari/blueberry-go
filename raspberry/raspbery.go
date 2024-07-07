@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strconv"
 	"sync"
 	"time"
 
@@ -16,8 +17,6 @@ const (
 	TypeInt    TaskParamType = "int"
 	TypeBool   TaskParamType = "bool"
 	TypeString TaskParamType = "string"
-	TypeSelect TaskParamType = "select"
-	TypeEnum   TaskParamType = "enum"
 	TypeFloat  TaskParamType = "float"
 )
 
@@ -107,8 +106,6 @@ func validateSchema(schema TaskSchema) error {
 		TypeInt:    {},
 		TypeBool:   {},
 		TypeString: {},
-		TypeSelect: {},
-		TypeEnum:   {},
 		TypeFloat:  {},
 	}
 	for _, fieldType := range schema.Fields {
@@ -120,15 +117,15 @@ func validateSchema(schema TaskSchema) error {
 }
 
 func (t *Task) ValidateParams(params TaskParams) error {
-	// Check if all required parameters are present
+	// Check if all required parameters are present and validate their types
 	for key, expectedType := range t.schema.Fields {
-		value, ok := params[key]
+		_, ok := params[key]
 		if !ok {
 			return fmt.Errorf("missing required parameter: %s", key)
 		}
 
-		if !validateType(value, expectedType) {
-			return fmt.Errorf("parameter %s should be of type %s", key, expectedType)
+		if err := validateType(params, key, expectedType); err != nil {
+			return err
 		}
 	}
 
@@ -142,20 +139,61 @@ func (t *Task) ValidateParams(params TaskParams) error {
 	return nil
 }
 
-func validateType(value interface{}, expectedType TaskParamType) bool {
+func validateType(params TaskParams, key string, expectedType TaskParamType) error {
+	value := params[key]
 	v := reflect.ValueOf(value)
+
 	switch expectedType {
 	case TypeInt:
-		return v.Kind() == reflect.Int
+		if v.Kind() == reflect.Int {
+			return nil
+		}
+		if v.Kind() == reflect.Float64 {
+			params[key] = int(value.(float64))
+			return nil
+		}
+		if v.Kind() == reflect.String {
+			intVal, err := strconv.Atoi(value.(string))
+			if err != nil {
+				return fmt.Errorf("parameter %s should be convertible to int", key)
+			}
+			params[key] = intVal
+			return nil
+		}
+		return fmt.Errorf("parameter %s should be of type int", key)
+
 	case TypeBool:
-		return v.Kind() == reflect.Bool
+		if v.Kind() == reflect.Bool {
+			return nil
+		}
+		return fmt.Errorf("parameter %s should be of type bool", key)
+
 	case TypeString:
-		return v.Kind() == reflect.String
+		if v.Kind() == reflect.String {
+			return nil
+		}
+		return fmt.Errorf("parameter %s should be of type string", key)
+
 	case TypeFloat:
-		return v.Kind() == reflect.Float64 || v.Kind() == reflect.Float32
-	// Add additional case handling for "select" and "enum" as needed
+		if v.Kind() == reflect.Float64 || v.Kind() == reflect.Float32 {
+			return nil
+		}
+		if v.Kind() == reflect.Int {
+			params[key] = float64(value.(int))
+			return nil
+		}
+		if v.Kind() == reflect.String {
+			floatVal, err := strconv.ParseFloat(value.(string), 64)
+			if err != nil {
+				return fmt.Errorf("parameter %s should be convertible to float", key)
+			}
+			params[key] = floatVal
+			return nil
+		}
+		return fmt.Errorf("parameter %s should be of type float", key)
+
 	default:
-		return false
+		return fmt.Errorf("unsupported parameter type %s", expectedType)
 	}
 }
 

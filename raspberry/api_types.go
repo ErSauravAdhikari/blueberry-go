@@ -26,3 +26,16 @@ type getTaskRunLogResponse struct {
 type getTaskExecutionsResponse struct {
 	TaskExecutions []TaskExecution `json:"task_executions"`
 }
+
+type ExecuteTaskRequest struct {
+	Params TaskParams `json:"params"`
+}
+
+type ErrorResponse struct {
+	Type   string `json:"type"`
+	Reason string `json:"reason"`
+}
+
+type GenericResponse struct {
+	Body string `json:"body"`
+}

@@ -40,7 +40,9 @@ func (r *Raspberry) RunAPI(port string) {
 	// Register routes for the web UI with cookie-based authentication
 	web := e.Group("")
 
-	web.Use(r.WebAuthMiddleware)
+	if len(r.webOnlyPasswords) > 0 {
+		web.Use(r.WebAuthMiddleware)
+	}
 
 	web.GET("/", r.listTasks)
 	web.GET("/task/:name", r.showTask)
@@ -49,11 +51,16 @@ func (r *Raspberry) RunAPI(port string) {
 
 	// Register routes for the API with appropriate authentication
 	api := e.Group("/api")
-	api.Use(r.APIKeyAuthMiddleware)
+
+	if len(r.apiKeys) > 0 {
+		api.Use(r.APIKeyAuthMiddleware)
+	}
+
 	api.GET("/tasks", r.getTasks)
 	api.GET("/task/:name/executions", r.getTaskExecutions)
 	api.GET("/task_run/:id/logs", r.getTaskRunLogs)
 	api.POST("/execution/:id/cancel", r.cancelExecutionByID)
+	api.POST("/task/:name/execute", r.ExecuteTaskByName)
 
 	// Swagger docs endpoint
 	e.GET("/swagger/*", echoSwagger.WrapHandler)

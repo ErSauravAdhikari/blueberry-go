@@ -73,6 +73,67 @@ const docTemplate = `{
                 }
             }
         },
+        "/task/{name}/execute": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Execute a specified task by its name with the provided parameters",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Execute a task by name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Task Name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Task Parameters",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rasberry.ExecuteTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Task executed successfully",
+                        "schema": {
+                            "$ref": "#/definitions/rasberry.GenericResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid parameters",
+                        "schema": {
+                            "$ref": "#/definitions/rasberry.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Task not found",
+                        "schema": {
+                            "$ref": "#/definitions/rasberry.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/rasberry.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/task/{name}/executions": {
             "get": {
                 "description": "Get all executions for a specific task by name",
@@ -190,6 +251,33 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "rasberry.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "reason": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "rasberry.ExecuteTaskRequest": {
+            "type": "object",
+            "properties": {
+                "params": {
+                    "$ref": "#/definitions/rasberry.TaskParams"
+                }
+            }
+        },
+        "rasberry.GenericResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                }
+            }
+        },
         "rasberry.ScheduleInfo": {
             "type": "object",
             "properties": {
@@ -245,6 +333,10 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "rasberry.TaskParams": {
+            "type": "object",
+            "additionalProperties": true
         },
         "rasberry.TaskRunLog": {
             "type": "object",

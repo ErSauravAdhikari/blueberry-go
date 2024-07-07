@@ -1,4 +1,4 @@
-module github.com/ersauravadhikari/raspberry-go
+module github.com/ersauravadhikari/blueberry-go
 
 go 1.22.3
 

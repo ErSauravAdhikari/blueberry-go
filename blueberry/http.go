@@ -1,7 +1,7 @@
 package rasberry
 
 import (
-	_ "github.com/ersauravadhikari/raspberry-go/docs"
+	_ "github.com/ersauravadhikari/blueberry-go/docs"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"

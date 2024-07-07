@@ -45,7 +45,7 @@ type ScheduleInfo struct {
 type Task struct {
 	name      string
 	taskFunc  func(context.Context, TaskParams, *Logger) error
-	raspberry *BlueBerry
+	blueBerry *BlueBerry
 	schema    TaskSchema
 }
 
@@ -63,7 +63,7 @@ type BlueBerry struct {
 	webOnlyPasswords map[string]string
 }
 
-func NewRaspberryInstance(db DB) *BlueBerry {
+func NewBlueBerryInstance(db DB) *BlueBerry {
 	return &BlueBerry{
 		db:               db,
 		cron:             cron.New(),
@@ -95,7 +95,7 @@ func (r *BlueBerry) RegisterTask(taskName string, taskFunc func(context.Context,
 		name:      taskName,
 		taskFunc:  taskFunc,
 		schema:    schema,
-		raspberry: r,
+		blueBerry: r,
 	}
 	r.tasks.Store(taskName, task)
 	return task, nil
@@ -202,7 +202,7 @@ func (t *Task) RegisterSchedule(params TaskParams, schedule string) error {
 		return err
 	}
 
-	entryID, err := t.raspberry.cron.AddFunc(schedule, func() {
+	entryID, err := t.blueBerry.cron.AddFunc(schedule, func() {
 		t.ExecuteNow(params)
 	})
 	if err != nil {
@@ -213,10 +213,10 @@ func (t *Task) RegisterSchedule(params TaskParams, schedule string) error {
 	scheduleInfo := ScheduleInfo{
 		Schedule:      schedule,
 		Params:        params,
-		NextExecution: t.raspberry.cron.Entry(entryID).Next.UTC().Unix(),
+		NextExecution: t.blueBerry.cron.Entry(entryID).Next.UTC().Unix(),
 		EntryID:       entryID,
 	}
-	t.raspberry.storeSchedule(t.name, scheduleInfo)
+	t.blueBerry.storeSchedule(t.name, scheduleInfo)
 
 	return nil
 }
@@ -233,7 +233,7 @@ func (t *Task) ExecuteNow(params TaskParams) (int, error) {
 		Status:    "started",
 	}
 
-	err := t.raspberry.db.SaveTaskRun(context.Background(), taskRun)
+	err := t.blueBerry.db.SaveTaskRun(context.Background(), taskRun)
 	if err != nil {
 		fmt.Printf("unable to log task start: %v\n", err)
 		return 0, err
@@ -243,10 +243,10 @@ func (t *Task) ExecuteNow(params TaskParams) (int, error) {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		t.raspberry.executing.Store(taskRun.ID, cancel)
-		defer t.raspberry.executing.Delete(taskRun.ID)
+		t.blueBerry.executing.Store(taskRun.ID, cancel)
+		defer t.blueBerry.executing.Delete(taskRun.ID)
 
-		logger := &Logger{taskRun: taskRun, db: t.raspberry.db}
+		logger := &Logger{taskRun: taskRun, db: t.blueBerry.db}
 		err = t.taskFunc(ctx, params, logger)
 		if err != nil {
 			taskRun.Status = "failed"
@@ -256,7 +256,7 @@ func (t *Task) ExecuteNow(params TaskParams) (int, error) {
 		}
 		taskRun.EndTime = time.Now().UTC()
 
-		err = t.raspberry.db.SaveTaskRun(ctx, taskRun)
+		err = t.blueBerry.db.SaveTaskRun(ctx, taskRun)
 		if err != nil {
 			_ = logger.Error("Unable to save task run due to: " + err.Error())
 		}

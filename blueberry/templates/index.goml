@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Raspberry - Task Scheduler</title>
+    <title>Blueberry - Task Scheduler</title>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet"/>
     <script>
         // On page load or when changing themes, best to add inline in `head` to avoid FOUC

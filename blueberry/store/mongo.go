@@ -2,7 +2,7 @@ package store
 
 import (
 	"context"
-	rasberry "github.com/ersauravadhikari/raspberry-go/blueberry"
+	blueberry "github.com/ersauravadhikari/blueberry-go/blueberry"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -35,7 +35,7 @@ func NewMongoDB(uri, dbName string) (*MongoDB, error) {
 	}, nil
 }
 
-func (db *MongoDB) SaveTaskRun(ctx context.Context, taskRun *rasberry.TaskRun) error {
+func (db *MongoDB) SaveTaskRun(ctx context.Context, taskRun *blueberry.TaskRun) error {
 	if taskRun.ID == 0 {
 		result, err := db.taskRuns.InsertOne(ctx, taskRun)
 		if err != nil {
@@ -53,7 +53,7 @@ func (db *MongoDB) SaveTaskRun(ctx context.Context, taskRun *rasberry.TaskRun) e
 	return nil
 }
 
-func (db *MongoDB) SaveTaskRunLog(ctx context.Context, taskRunLog *rasberry.TaskRunLog) error {
+func (db *MongoDB) SaveTaskRunLog(ctx context.Context, taskRunLog *blueberry.TaskRunLog) error {
 	result, err := db.taskRunLogs.InsertOne(ctx, taskRunLog)
 	if err != nil {
 		return err
@@ -62,16 +62,16 @@ func (db *MongoDB) SaveTaskRunLog(ctx context.Context, taskRunLog *rasberry.Task
 	return nil
 }
 
-func (db *MongoDB) GetTaskRuns(ctx context.Context) ([]rasberry.TaskRun, error) {
+func (db *MongoDB) GetTaskRuns(ctx context.Context) ([]blueberry.TaskRun, error) {
 	cursor, err := db.taskRuns.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
 	}
 	defer cursor.Close(ctx)
 
-	var taskRuns []rasberry.TaskRun
+	var taskRuns []blueberry.TaskRun
 	for cursor.Next(ctx) {
-		var taskRun rasberry.TaskRun
+		var taskRun blueberry.TaskRun
 		if err := cursor.Decode(&taskRun); err != nil {
 			return nil, err
 		}
@@ -80,7 +80,7 @@ func (db *MongoDB) GetTaskRuns(ctx context.Context) ([]rasberry.TaskRun, error) 
 	return taskRuns, nil
 }
 
-func (db *MongoDB) GetPaginatedTaskRunsForTaskName(ctx context.Context, name string, page, limit int) ([]rasberry.TaskRun, error) {
+func (db *MongoDB) GetPaginatedTaskRunsForTaskName(ctx context.Context, name string, page, limit int) ([]blueberry.TaskRun, error) {
 	skip := (page - 1) * limit
 	cursor, err := db.taskRuns.Find(ctx, bson.M{"task_name": name}, options.Find().SetSort(bson.M{"start_time": -1}).SetSkip(int64(skip)).SetLimit(int64(limit)))
 	if err != nil {
@@ -88,9 +88,9 @@ func (db *MongoDB) GetPaginatedTaskRunsForTaskName(ctx context.Context, name str
 	}
 	defer cursor.Close(ctx)
 
-	var taskRuns []rasberry.TaskRun
+	var taskRuns []blueberry.TaskRun
 	for cursor.Next(ctx) {
-		var taskRun rasberry.TaskRun
+		var taskRun blueberry.TaskRun
 		if err := cursor.Decode(&taskRun); err != nil {
 			return nil, err
 		}
@@ -107,7 +107,7 @@ func (db *MongoDB) GetTaskRunsCountForTaskName(ctx context.Context, name string)
 	return int(count), nil
 }
 
-func (db *MongoDB) GetTaskRunLogs(ctx context.Context, taskRunID int) ([]rasberry.TaskRunLog, error) {
+func (db *MongoDB) GetTaskRunLogs(ctx context.Context, taskRunID int) ([]blueberry.TaskRunLog, error) {
 	filter := bson.M{"task_run_id": taskRunID}
 	cursor, err := db.taskRunLogs.Find(ctx, filter)
 	if err != nil {
@@ -115,9 +115,9 @@ func (db *MongoDB) GetTaskRunLogs(ctx context.Context, taskRunID int) ([]rasberr
 	}
 	defer cursor.Close(ctx)
 
-	var taskRunLogs []rasberry.TaskRunLog
+	var taskRunLogs []blueberry.TaskRunLog
 	for cursor.Next(ctx) {
-		var taskRunLog rasberry.TaskRunLog
+		var taskRunLog blueberry.TaskRunLog
 		if err := cursor.Decode(&taskRunLog); err != nil {
 			return nil, err
 		}
@@ -126,7 +126,7 @@ func (db *MongoDB) GetTaskRunLogs(ctx context.Context, taskRunID int) ([]rasberr
 	return taskRunLogs, nil
 }
 
-func (db *MongoDB) GetPaginatedTaskRunLogs(ctx context.Context, taskRunID int, level string, page, size int) ([]rasberry.TaskRunLog, error) {
+func (db *MongoDB) GetPaginatedTaskRunLogs(ctx context.Context, taskRunID int, level string, page, size int) ([]blueberry.TaskRunLog, error) {
 	filter := bson.M{"task_run_id": taskRunID}
 	if level != "all" {
 		filter["level"] = level
@@ -142,9 +142,9 @@ func (db *MongoDB) GetPaginatedTaskRunLogs(ctx context.Context, taskRunID int, l
 	}
 	defer cursor.Close(ctx)
 
-	var taskRunLogs []rasberry.TaskRunLog
+	var taskRunLogs []blueberry.TaskRunLog
 	for cursor.Next(ctx) {
-		var taskRunLog rasberry.TaskRunLog
+		var taskRunLog blueberry.TaskRunLog
 		if err := cursor.Decode(&taskRunLog); err != nil {
 			return nil, err
 		}
@@ -153,9 +153,9 @@ func (db *MongoDB) GetPaginatedTaskRunLogs(ctx context.Context, taskRunID int, l
 	return taskRunLogs, nil
 }
 
-func (db *MongoDB) GetTaskRunByID(ctx context.Context, id int) (*rasberry.TaskRun, error) {
+func (db *MongoDB) GetTaskRunByID(ctx context.Context, id int) (*blueberry.TaskRun, error) {
 	filter := bson.M{"id": id}
-	var taskRun rasberry.TaskRun
+	var taskRun blueberry.TaskRun
 	err := db.taskRuns.FindOne(ctx, filter).Decode(&taskRun)
 	if err != nil {
 		return nil, err

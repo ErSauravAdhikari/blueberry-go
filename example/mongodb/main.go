@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	rasberry "github.com/ersauravadhikari/raspberry-go/blueberry"
-	"github.com/ersauravadhikari/raspberry-go/blueberry/store"
+	rasberry "github.com/ersauravadhikari/blueberry-go/blueberry"
+	"github.com/ersauravadhikari/blueberry-go/blueberry/store"
 	"log"
 	"os"
 	"os/signal"
@@ -47,7 +47,7 @@ func main() {
 	}
 	defer mongoDB.Close()
 
-	rb := rasberry.NewRaspberryInstance(mongoDB)
+	rb := rasberry.NewBlueBerryInstance(mongoDB)
 
 	rb.AddWebOnlyPasswordAuth("admin", "password")
 	rb.AddWebOnlyPasswordAuth("admin1", "password1")

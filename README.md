@@ -27,12 +27,12 @@ BlueBerry is a task scheduler with a web GUI and an API, designed to make schedu
 To install BlueBerry, you need to have Go installed. Use the following command to get the BlueBerry module:
 
 ```bash
-go get github.com/ersauravadhikari/raspberry-go/blueberry
+go get github.com/ersauravadhikari/blueberry-go/blueberry
 ```
 
 ### Getting Started
 
-Below is an example script to demonstrate how to use BlueBerry. You can find the full example in the [example/filesystem/main.go](https://github.com/ErSauravAdhikari/raspberry-go/blob/production/example/filesystem/main.go) file.
+Below is an example script to demonstrate how to use BlueBerry. You can find the full example in the [example/filesystem/main.go](https://github.com/ErSauravAdhikari/blueberry-go/blob/production/example/filesystem/main.go) file.
 
 ### Example Usage
 
@@ -321,13 +321,13 @@ rb.RunAPI("8080")
 
 ### Full Example
 
-For a complete example of how to set up and use BlueBerry, see the [full example](https://github.com/ErSauravAdhikari/raspberry-go/blob/production/example/filesystem/main.go) in the repository.
+For a complete example of how to set up and use BlueBerry, see the [full example](https://github.com/ErSauravAdhikari/blueberry-go/blob/production/example/filesystem/main.go) in the repository.
 
 More examples are available under the examples folder.
 
 ### Multi DB Support
 
-BlueBerry supports multiple DB types including SQLite, PostgreSQL, and MongoDB. All of these are stored under the raspberry-go/blueberry/store package. Here is an example of using the mongodb store engine.
+BlueBerry supports multiple DB types including SQLite, PostgreSQL, and MongoDB. All of these are stored under the blueberry-go/blueberry/store package. Here is an example of using the mongodb store engine.
 
 ```go
 func main() {

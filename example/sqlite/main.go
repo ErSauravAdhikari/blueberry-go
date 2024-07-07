@@ -63,7 +63,7 @@ func main() {
 		log.Fatalf("Failed to register schedule: %v", err)
 	}
 
-	err = tsk1.ExecuteNow(context.Background(), rasberry.TaskParams{
+	err = tsk1.ExecuteNow(rasberry.TaskParams{
 		"param1": "value1",
 		"param2": 1,
 		"param3": true,

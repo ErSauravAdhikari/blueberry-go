@@ -149,3 +149,65 @@ func (r *Raspberry) cancelExecutionByIDWeb(c echo.Context) error {
 
 	return c.Redirect(http.StatusSeeOther, fmt.Sprintf("/execution/%d", taskRunID))
 }
+
+// ExecuteTaskForm renders the form for executing a task
+func (r *Raspberry) ExecuteTaskForm(c echo.Context) error {
+	taskName := c.Param("name")
+	taskInterface, ok := r.tasks.Load(taskName)
+	if !ok {
+		return c.JSON(http.StatusNotFound, "Task not found")
+	}
+
+	task := taskInterface.(*Task)
+
+	data := struct {
+		TaskName string
+		Schema   TaskSchema
+	}{
+		TaskName: task.name,
+		Schema:   task.schema,
+	}
+
+	return c.Render(http.StatusOK, "task_run.goml", data)
+}
+
+// HandleExecuteTask processes the form submission to execute a task
+func (r *Raspberry) HandleExecuteTask(c echo.Context) error {
+	taskName := c.Param("name")
+	taskInterface, ok := r.tasks.Load(taskName)
+	if !ok {
+		return c.JSON(http.StatusNotFound, "Task not found")
+	}
+
+	task := taskInterface.(*Task)
+
+	params := make(TaskParams)
+	for key := range task.schema.Fields {
+		value := c.FormValue(key)
+		if task.schema.Fields[key] == TypeInt {
+			intVal, err := strconv.Atoi(value)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, fmt.Sprintf("Invalid value for %s", key))
+			}
+			params[key] = intVal
+		} else if task.schema.Fields[key] == TypeFloat {
+			floatVal, err := strconv.ParseFloat(value, 64)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, fmt.Sprintf("Invalid value for %s", key))
+			}
+			params[key] = floatVal
+		} else if task.schema.Fields[key] == TypeBool {
+			boolVal := value == "on"
+			params[key] = boolVal
+			fmt.Printf("Parameter %s: %v\n", key, boolVal)
+		} else {
+			params[key] = value
+		}
+	}
+
+	if err := task.ExecuteNow(params); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.Redirect(http.StatusFound, "/task/"+task.name)
+}

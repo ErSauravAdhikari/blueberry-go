@@ -46,6 +46,8 @@ func (r *Raspberry) RunAPI(port string) {
 
 	web.GET("/", r.listTasks)
 	web.GET("/task/:name", r.showTask)
+	web.GET("/task/:name/run", r.ExecuteTaskForm)
+	web.POST("/task/:name/execute", r.HandleExecuteTask)
 	web.GET("/execution/:id", r.showExecution)
 	web.POST("/execution/:id/cancel", r.cancelExecutionByIDWeb)
 

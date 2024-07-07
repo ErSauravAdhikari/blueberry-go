@@ -203,7 +203,7 @@ func (t *Task) RegisterSchedule(params TaskParams, schedule string) error {
 	}
 
 	entryID, err := t.raspberry.cron.AddFunc(schedule, func() {
-		t.ExecuteNow(context.Background(), params)
+		t.ExecuteNow(params)
 	})
 	if err != nil {
 		return err
@@ -221,13 +221,13 @@ func (t *Task) RegisterSchedule(params TaskParams, schedule string) error {
 	return nil
 }
 
-func (t *Task) ExecuteNow(ctx context.Context, params TaskParams) error {
+func (t *Task) ExecuteNow(params TaskParams) error {
 	if err := t.ValidateParams(params); err != nil {
 		return err
 	}
 
-	go func(ctx context.Context, params TaskParams) {
-		ctx, cancel := context.WithCancel(ctx)
+	go func(params TaskParams) {
+		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
 		taskRun := &TaskRun{
@@ -260,7 +260,7 @@ func (t *Task) ExecuteNow(ctx context.Context, params TaskParams) error {
 		if err != nil {
 			_ = logger.Error("Unable to save task run due to: " + err.Error())
 		}
-	}(ctx, params)
+	}(params)
 
 	return nil
 }

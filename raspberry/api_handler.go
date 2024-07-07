@@ -197,8 +197,7 @@ func (r *Raspberry) ExecuteTaskByName(c echo.Context) error {
 		})
 	}
 
-	ctx := c.Request().Context()
-	if err := task.ExecuteNow(ctx, req.Params); err != nil {
+	if err := task.ExecuteNow(req.Params); err != nil {
 		return c.JSON(http.StatusInternalServerError, ErrorResponse{
 			"system",
 			err.Error(),

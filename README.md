@@ -1,7 +1,3 @@
-Here's the updated README.md reflecting the major changes:
-
----
-
 ## BlueBerry Task Scheduler
 
 BlueBerry is a task scheduler with a web GUI and an API, designed to make scheduling and managing tasks easy and efficient.

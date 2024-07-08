@@ -112,3 +112,35 @@ func convertToFloat(value interface{}) (float64, error) {
 		return 0.0, errors.New("value should be of type float")
 	}
 }
+
+// NewTaskParamsFromStruct generates TaskParams from a given struct using tags
+func NewTaskParamsFromStruct(s interface{}) (TaskParams, error) {
+	params := TaskParams{}
+	v := reflect.ValueOf(s)
+	t := v.Type()
+
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		fieldName := field.Tag.Get("task")
+		if fieldName == "" {
+			fieldName = field.Name
+		}
+		fieldValue := v.Field(i).Interface()
+		fieldType := field.Type.Kind()
+
+		switch fieldType {
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			params[fieldName] = fieldValue
+		case reflect.Bool:
+			params[fieldName] = fieldValue
+		case reflect.String:
+			params[fieldName] = fieldValue
+		case reflect.Float32, reflect.Float64:
+			params[fieldName] = fieldValue
+		default:
+			return nil, fmt.Errorf("unsupported type for field %s: %s", fieldName, fieldType)
+		}
+	}
+
+	return params, nil
+}

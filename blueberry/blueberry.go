@@ -11,29 +11,6 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-type TaskParamType string
-
-const (
-	TypeInt    TaskParamType = "int"
-	TypeBool   TaskParamType = "bool"
-	TypeString TaskParamType = "string"
-	TypeFloat  TaskParamType = "float"
-)
-
-type TaskParamDefinition map[string]TaskParamType
-
-// TaskSchema is used to define the schema for the task
-type TaskSchema struct {
-	Fields TaskParamDefinition // map[fieldName]fieldType
-}
-
-// NewTaskSchema is a helper function to create a new TaskSchema
-func NewTaskSchema(fields TaskParamDefinition) TaskSchema {
-	return TaskSchema{
-		Fields: fields,
-	}
-}
-
 type ScheduleInfo struct {
 	Schedule      string                 `json:"schedule"`
 	Params        map[string]interface{} `json:"params"`

@@ -26,17 +26,37 @@ func task1(ctx context.Context, params rasberry.TaskParams, logger *rasberry.Log
 	if err := logger.Info("Starting Task 1"); err != nil {
 		return err
 	}
-	select {
-	case <-time.After(10 * time.Minute):
-		if err := logger.Success("Task 1 completed successfully"); err != nil {
-			return err
+
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+
+	timeout := time.After(5 * time.Minute)
+
+	for {
+		select {
+		case <-ticker.C:
+			if err := logger.Debug("Task 1 is still running..."); err != nil {
+				return err
+			}
+		case <-timeout:
+			select {
+			case <-time.After(5 * time.Minute):
+				if err := logger.Success("Task 1 completed successfully"); err != nil {
+					return err
+				}
+				return nil
+			case <-ctx.Done():
+				if err := logger.Error("Task 1 cancelled"); err != nil {
+					return err
+				}
+				return ctx.Err()
+			}
+		case <-ctx.Done():
+			if err := logger.Error("Task 1 cancelled"); err != nil {
+				return err
+			}
+			return ctx.Err()
 		}
-		return nil
-	case <-ctx.Done():
-		if err := logger.Error("Task 1 cancelled"); err != nil {
-			return err
-		}
-		return ctx.Err()
 	}
 }
 

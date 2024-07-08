@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Blueberry - Task Scheduler</title>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet"/>
+    <script src="https://unpkg.com/htmx.org@1.7.0"></script>
     <script>
         // On page load or when changing themes, best to add inline in `head` to avoid FOUC
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -19,22 +20,6 @@
 
         function closeModal() {
             document.getElementById('modal').classList.add('hidden');
-        }
-
-        function filterLogs(level) {
-            const logsTable = document.getElementById("logs-table");
-            const rows = logsTable.querySelectorAll("tbody tr");
-
-            rows.forEach(row => {
-                if (level === 'all' || row.dataset.level === level) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-
-            // Update analytics
-            updateAnalytics(level);
         }
 
         function updateAnalytics(level) {
@@ -53,77 +38,160 @@
         document.addEventListener('DOMContentLoaded', () => {
             updateAnalytics('all');
         });
+
+        function filterLogsByLevel() {
+            const level = document.getElementById('logLevelFilter').value;
+            const urlParams = new URLSearchParams(window.location.search);
+            if (level) {
+                urlParams.set('level', level);
+            } else {
+                urlParams.delete('level');
+            }
+            window.location.search = urlParams.toString();
+        }
     </script>
+    <style>
+        .progress {
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+            height: 4px;
+            width: 100%;
+            border-radius: 2px;
+            background-clip: padding-box;
+            overflow: hidden;
+        }
+        .progress .indeterminate:before {
+            content: "";
+            position: absolute;
+            background-color: inherit;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            will-change: left, right;
+            -webkit-animation: indeterminate 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395)
+            infinite;
+            animation: indeterminate 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite;
+        }
+        .progress .indeterminate:after {
+            content: "";
+            position: absolute;
+            background-color: inherit;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            will-change: left, right;
+            -webkit-animation: indeterminate-short 2.1s cubic-bezier(0.165, 0.84, 0.44, 1)
+            infinite;
+            animation: indeterminate-short 2.1s cubic-bezier(0.165, 0.84, 0.44, 1)
+            infinite;
+            -webkit-animation-delay: 1.15s;
+            animation-delay: 1.15s;
+        }
+        .progress {
+            display: none;
+        }
+        .htmx-request .progress {
+            display: inline;
+        }
+        .htmx-request.progress {
+            display: inline;
+        }
+        @-webkit-keyframes indeterminate {
+            0% {
+                left: -35%;
+                right: 100%;
+            }
+            60% {
+                left: 100%;
+                right: -90%;
+            }
+            100% {
+                left: 100%;
+                right: -90%;
+            }
+        }
+        @keyframes indeterminate {
+            0% {
+                left: -35%;
+                right: 100%;
+            }
+            60% {
+                left: 100%;
+                right: -90%;
+            }
+            100% {
+                left: 100%;
+                right: -90%;
+            }
+        }
+        @-webkit-keyframes indeterminate-short {
+            0% {
+                left: -200%;
+                right: 100%;
+            }
+            60% {
+                left: 107%;
+                right: -8%;
+            }
+            100% {
+                left: 107%;
+                right: -8%;
+            }
+        }
+        @keyframes indeterminate-short {
+            0% {
+                left: -200%;
+                right: 100%;
+            }
+            60% {
+                left: 107%;
+                right: -8%;
+            }
+            100% {
+                left: 107%;
+                right: -8%;
+            }
+        }
+    </style>
 </head>
-<body class="bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100">
+<body class="bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100" hx-indicator=".progress">
+<div class="progress" style="height: 3px; background-color: white;">
+    <div class="indeterminate" style="background-color: red;"></div>
+</div>
 {{ template "navbar.goml" . }}
 <div class="container mx-auto p-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold dark:text-white">Execution ID: {{.ID}}</h1>
-        {{if eq .Status "started"}}
-            <button onclick="openModal({{.ID}})" class="px-4 py-2 bg-red-500 text-white rounded">Cancel</button>
-        {{end}}
     </div>
     <table class="table-auto w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 mb-4">
         <tbody>
         <tr>
-            <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">Task:</td>
-            <td class="px-6 py-4">{{.TaskName}}</td>
+            <td class="px-6 py-2 font-medium text-gray-900 dark:text-gray-100">Task:</td>
+            <td class="px-6 py-2">{{.TaskName}}</td>
         </tr>
         <tr>
-            <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">Start Time:</td>
-            <td class="px-6 py-4">{{.StartTime | formatDateTime}}</td>
+            <td class="px-6 py-2 font-medium text-gray-900 dark:text-gray-100">Start Time:</td>
+            <td class="px-6 py-2">{{.StartTime | formatDateTime}}</td>
         </tr>
         <tr>
-            <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">End Time:</td>
-            <td class="px-6 py-4">{{if eq .Status "started"}}None{{else}}{{.EndTime | formatDateTime}}{{end}}</td>
+            <td class="px-6 py-2 font-medium text-gray-900 dark:text-gray-100">End Time:</td>
+            <td class="px-6 py-2">{{if eq .Status "started"}}None{{else}}{{.EndTime | formatDateTime}}{{end}}</td>
         </tr>
         <tr>
-            <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">Status:</td>
-            <td class="px-6 py-4">{{.Status}}</td>
+            <td class="px-6 py-2 font-medium text-gray-900 dark:text-gray-100">Status:</td>
+            <td class="px-6 py-2">{{.Status}}</td>
         </tr>
         </tbody>
     </table>
 
-    <h2 class="text-2xl font-semibold mt-4 mb-2 dark:text-white">Logs</h2>
-    <div class="flex mb-4">
-        <div class="w-1/2">
-            <label for="logLevelFilter" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Filter by Level:</label>
-            <select id="logLevelFilter" onchange="filterLogs(this.value)" class="mt-1 block w-full p-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm">
-                <option value="all">All</option>
-                <option value="info">Info</option>
-                <option value="success">Success</option>
-                <option value="error">Error</option>
-            </select>
-        </div>
-        <div class="w-1/2 flex items-center justify-center text-sm font-medium text-gray-700 dark:text-gray-300">
-            <div id="totalLogs" class="mr-4 p-2 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm"></div>
-            <div id="visibleLogs" class="p-2 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm"></div>
-        </div>
-    </div>
-    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-        <table id="logs-table" class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-            <tr>
-                <th scope="col" class="px-6 py-3">Level</th>
-                <th scope="col" class="px-6 py-3">Timestamp</th>
-                <th scope="col" class="px-6 py-3">Message</th>
-            </tr>
-            </thead>
-            <tbody>
-            {{range .Logs}}
-                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700" data-level="{{.Level}}">
-                    <td class="px-6 py-4 font-medium {{if eq .Level "success"}}text-green-500 dark:text-green-400{{else if eq .Level "error"}}text-red-500 dark:text-red-400{{end}}">
-                        {{.Level}}
-                    </td>
-                    <td class="px-6 py-4">{{.Timestamp | formatDateTime}}</td>
-                    <td class="px-6 py-4">{{.Message}}</td>
-                </tr>
+    <div
+            {{if eq .Status "started" }}
+                hx-get="/execution/{{.ID}}?page={{.CurrentPage}}&size={{.PageSize}}&level={{.Level}}" hx-trigger="load, every 5s" hx-target="#logs-section" hx-swap="outerHTML"
             {{end}}
-            </tbody>
-        </table>
+    >
+        {{ template "logs.goml" . }}
     </div>
-    <a href="/task/{{.TaskName}}" class="text-blue-500 hover:underline mt-4 inline-block">Back to task</a>
 </div>
 
 <!-- Modal -->

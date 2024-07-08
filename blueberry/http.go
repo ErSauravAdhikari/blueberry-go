@@ -50,6 +50,7 @@ func (r *BlueBerry) RunAPI(port string) {
 	web.POST("/task/:name/execute", r.handleExecuteTask)
 	web.GET("/execution/:id", r.showExecution)
 	web.POST("/execution/:id/cancel", r.cancelExecutionByIDWeb)
+	web.GET("/execution/:id/download", r.downloadLogs)
 
 	// Register routes for the API with appropriate authentication
 	api := e.Group("/api")

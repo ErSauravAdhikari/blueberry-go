@@ -126,7 +126,7 @@ func (db *MongoDB) GetTaskRunLogs(ctx context.Context, taskRunID int) ([]blueber
 	return taskRunLogs, nil
 }
 
-func (db *MongoDB) GetPaginatedTaskRunLogs(ctx context.Context, taskRunID int, level string, page, size int) ([]blueberry.TaskRunLog, error) {
+func (db *MongoDB) GetPaginatedTaskRunLogs(ctx context.Context, taskRunID int, level string, page, size int) ([]blueberry.TaskRunLog, int, error) {
 	filter := bson.M{"task_run_id": taskRunID}
 	if level != "all" {
 		filter["level"] = level
@@ -138,7 +138,7 @@ func (db *MongoDB) GetPaginatedTaskRunLogs(ctx context.Context, taskRunID int, l
 
 	cursor, err := db.taskRunLogs.Find(ctx, filter, options)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer cursor.Close(ctx)
 
@@ -146,11 +146,21 @@ func (db *MongoDB) GetPaginatedTaskRunLogs(ctx context.Context, taskRunID int, l
 	for cursor.Next(ctx) {
 		var taskRunLog blueberry.TaskRunLog
 		if err := cursor.Decode(&taskRunLog); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		taskRunLogs = append(taskRunLogs, taskRunLog)
 	}
-	return taskRunLogs, nil
+
+	totalCount, err := db.taskRunLogs.CountDocuments(ctx, filter)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	if taskRunLogs == nil {
+		return []blueberry.TaskRunLog{}, int(totalCount), nil
+	}
+
+	return taskRunLogs, int(totalCount), nil
 }
 
 func (db *MongoDB) GetTaskRunByID(ctx context.Context, id int) (*blueberry.TaskRun, error) {

@@ -187,19 +187,24 @@ func (db *SQLiteDB) GetTaskRunLogs(ctx context.Context, taskRunID int) ([]bluebe
 	return taskRunLogs, nil
 }
 
-func (db *SQLiteDB) GetPaginatedTaskRunLogs(ctx context.Context, taskRunID int, level string, page, size int) ([]blueberry.TaskRunLog, error) {
+func (db *SQLiteDB) GetPaginatedTaskRunLogs(ctx context.Context, taskRunID int, level string, page, size int) ([]blueberry.TaskRunLog, int, error) {
 	query := "SELECT id, task_run_id, timestamp, level, message FROM task_run_logs WHERE task_run_id = ?"
+	countQuery := "SELECT COUNT(*) FROM task_run_logs WHERE task_run_id = ?"
 	args := []interface{}{taskRunID}
 	if level != "all" {
 		query += " AND level = ?"
+		countQuery += " AND level = ?"
 		args = append(args, level)
 	}
+
+	query += " ORDER BY timestamp DESC"
+
 	query += " LIMIT ? OFFSET ?"
 	args = append(args, size, (page-1)*size)
 
 	rows, err := db.conn.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -207,16 +212,22 @@ func (db *SQLiteDB) GetPaginatedTaskRunLogs(ctx context.Context, taskRunID int, 
 	for rows.Next() {
 		var taskRunLog blueberry.TaskRunLog
 		if err := rows.Scan(&taskRunLog.ID, &taskRunLog.TaskRunID, &taskRunLog.Timestamp, &taskRunLog.Level, &taskRunLog.Message); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		taskRunLogs = append(taskRunLogs, taskRunLog)
 	}
 
-	if taskRunLogs == nil {
-		return []blueberry.TaskRunLog{}, nil
+	var totalCount int
+	err = db.conn.QueryRowContext(ctx, countQuery, args[:len(args)-2]...).Scan(&totalCount)
+	if err != nil {
+		return nil, 0, err
 	}
 
-	return taskRunLogs, nil
+	if taskRunLogs == nil {
+		return []blueberry.TaskRunLog{}, totalCount, nil
+	}
+
+	return taskRunLogs, totalCount, nil
 }
 
 func (db *SQLiteDB) Close() error {

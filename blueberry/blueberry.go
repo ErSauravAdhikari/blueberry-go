@@ -21,7 +21,6 @@ const (
 )
 
 type TaskParamDefinition map[string]TaskParamType
-type TaskParams map[string]interface{}
 
 // TaskSchema is used to define the schema for the task
 type TaskSchema struct {
@@ -84,7 +83,7 @@ func (r *BlueBerry) AddAPIOnlyKeyAuth(apiKey, description string) {
 	r.apiKeys[apiKey] = description
 }
 
-func (r *BlueBerry) RegisterTask(taskName string, taskFunc func(context.Context, TaskParams, *Logger) error, schema TaskSchema) (*Task, error) {
+func (r *BlueBerry) RegisterTask(taskName string, taskFunc TaskFunc, schema TaskSchema) (*Task, error) {
 	if err := validateSchema(schema); err != nil {
 		return nil, err
 	}

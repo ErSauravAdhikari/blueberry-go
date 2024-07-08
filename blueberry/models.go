@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+type TaskFunc func(context.Context, TaskParams, *Logger) error
+
 type TaskRun struct {
 	ID        int                    `json:"id"`
 	TaskName  string                 `json:"task_name"`

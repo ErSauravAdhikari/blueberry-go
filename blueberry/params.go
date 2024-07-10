@@ -9,6 +9,7 @@ import (
 
 type TaskParams map[string]interface{}
 
+// GetInt retrieves an int value from TaskParams
 func (t TaskParams) GetInt(key string) (int, error) {
 	value, exists := t[key]
 	if !exists {
@@ -22,6 +23,17 @@ func (t TaskParams) GetInt(key string) (int, error) {
 	return intValue, nil
 }
 
+// GetIntOrDefault retrieves an int value or returns a default value
+func (t TaskParams) GetIntOrDefault(key string, val int) int {
+	intVal, err := t.GetInt(key)
+	if err != nil {
+		return val
+	}
+
+	return intVal
+}
+
+// GetString retrieves a string value from TaskParams
 func (t TaskParams) GetString(key string) (string, error) {
 	value, exists := t[key]
 	if !exists {
@@ -35,6 +47,17 @@ func (t TaskParams) GetString(key string) (string, error) {
 	return strValue, nil
 }
 
+// GetStringOrDefault retrieves a string value or returns a default value
+func (t TaskParams) GetStringOrDefault(key string, val string) string {
+	strVal, err := t.GetString(key)
+	if err != nil {
+		return val
+	}
+
+	return strVal
+}
+
+// GetBool retrieves a bool value from TaskParams
 func (t TaskParams) GetBool(key string) (bool, error) {
 	value, exists := t[key]
 	if !exists {
@@ -48,6 +71,17 @@ func (t TaskParams) GetBool(key string) (bool, error) {
 	return boolValue, nil
 }
 
+// GetBoolOrDefault retrieves a bool value or returns a default value
+func (t TaskParams) GetBoolOrDefault(key string, val bool) bool {
+	boolVal, err := t.GetBool(key)
+	if err != nil {
+		return val
+	}
+
+	return boolVal
+}
+
+// GetFloat retrieves a float64 value from TaskParams
 func (t TaskParams) GetFloat(key string) (float64, error) {
 	value, exists := t[key]
 	if !exists {
@@ -59,6 +93,16 @@ func (t TaskParams) GetFloat(key string) (float64, error) {
 		return 0.0, err
 	}
 	return floatValue, nil
+}
+
+// GetFloatOrDefault retrieves a float64 value or returns a default value
+func (t TaskParams) GetFloatOrDefault(key string, val float64) float64 {
+	floatVal, err := t.GetFloat(key)
+	if err != nil {
+		return val
+	}
+
+	return floatVal
 }
 
 func convertToInt(value interface{}) (int, error) {

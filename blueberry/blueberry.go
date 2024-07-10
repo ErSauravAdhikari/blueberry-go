@@ -11,30 +11,6 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-type TaskParamType string
-
-const (
-	TypeInt    TaskParamType = "int"
-	TypeBool   TaskParamType = "bool"
-	TypeString TaskParamType = "string"
-	TypeFloat  TaskParamType = "float"
-)
-
-type TaskParamDefinition map[string]TaskParamType
-type TaskParams map[string]interface{}
-
-// TaskSchema is used to define the schema for the task
-type TaskSchema struct {
-	Fields TaskParamDefinition // map[fieldName]fieldType
-}
-
-// NewTaskSchema is a helper function to create a new TaskSchema
-func NewTaskSchema(fields TaskParamDefinition) TaskSchema {
-	return TaskSchema{
-		Fields: fields,
-	}
-}
-
 type ScheduleInfo struct {
 	Schedule      string                 `json:"schedule"`
 	Params        map[string]interface{} `json:"params"`
@@ -84,7 +60,7 @@ func (r *BlueBerry) AddAPIOnlyKeyAuth(apiKey, description string) {
 	r.apiKeys[apiKey] = description
 }
 
-func (r *BlueBerry) RegisterTask(taskName string, taskFunc func(context.Context, TaskParams, *Logger) error, schema TaskSchema) (*Task, error) {
+func (r *BlueBerry) RegisterTask(taskName string, taskFunc TaskFunc, schema TaskSchema) (*Task, error) {
 	if err := validateSchema(schema); err != nil {
 		return nil, err
 	}

@@ -137,19 +137,25 @@ func (db *PostgresDB) GetTaskRunLogs(ctx context.Context, taskRunID int) ([]blue
 	}
 	return taskRunLogs, nil
 }
-func (db *PostgresDB) GetPaginatedTaskRunLogs(ctx context.Context, taskRunID int, level string, page, size int) ([]blueberry.TaskRunLog, error) {
+
+func (db *PostgresDB) GetPaginatedTaskRunLogs(ctx context.Context, taskRunID int, level string, page, size int) ([]blueberry.TaskRunLog, int, error) {
 	query := "SELECT id, task_run_id, timestamp, level, message FROM task_run_logs WHERE task_run_id = $1"
+	countQuery := "SELECT COUNT(*) FROM task_run_logs WHERE task_run_id = $1"
 	args := []interface{}{taskRunID}
 	if level != "all" {
 		query += " AND level = $2"
+		countQuery += " AND level = $2"
 		args = append(args, level)
 	}
+
+	query += " ORDER BY timestamp DESC"
+
 	query += " LIMIT $3 OFFSET $4"
 	args = append(args, size, (page-1)*size)
 
 	rows, err := db.conn.Query(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -157,11 +163,22 @@ func (db *PostgresDB) GetPaginatedTaskRunLogs(ctx context.Context, taskRunID int
 	for rows.Next() {
 		var taskRunLog blueberry.TaskRunLog
 		if err := rows.Scan(&taskRunLog.ID, &taskRunLog.TaskRunID, &taskRunLog.Timestamp, &taskRunLog.Level, &taskRunLog.Message); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		taskRunLogs = append(taskRunLogs, taskRunLog)
 	}
-	return taskRunLogs, nil
+
+	var totalCount int
+	err = db.conn.QueryRow(ctx, countQuery, args[:len(args)-2]...).Scan(&totalCount)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	if taskRunLogs == nil {
+		return []blueberry.TaskRunLog{}, totalCount, nil
+	}
+
+	return taskRunLogs, totalCount, nil
 }
 
 func (db *PostgresDB) GetTaskRunByID(ctx context.Context, id int) (*blueberry.TaskRun, error) {

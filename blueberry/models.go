@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+type TaskFunc func(context.Context, TaskParams, *Logger) error
+
 type TaskRun struct {
 	ID        int                    `json:"id"`
 	TaskName  string                 `json:"task_name"`
@@ -30,7 +32,7 @@ type DB interface {
 	GetTaskRuns(ctx context.Context) ([]TaskRun, error)
 	GetTaskRunByID(ctx context.Context, id int) (*TaskRun, error)
 	GetTaskRunLogs(ctx context.Context, taskRunID int) ([]TaskRunLog, error)
-	GetPaginatedTaskRunLogs(ctx context.Context, taskRunID int, level string, page, size int) ([]TaskRunLog, error)
+	GetPaginatedTaskRunLogs(ctx context.Context, taskRunID int, level string, page, size int) ([]TaskRunLog, int, error)
 	GetPaginatedTaskRunsForTaskName(ctx context.Context, name string, page, limit int) ([]TaskRun, error)
 	GetTaskRunsCountForTaskName(ctx context.Context, name string) (int, error)
 	Close() error

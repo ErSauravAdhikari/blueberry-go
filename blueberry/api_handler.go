@@ -122,7 +122,7 @@ func (r *BlueBerry) getTaskRunLogs(c echo.Context) error {
 		size = 10
 	}
 
-	logs, err := r.db.GetPaginatedTaskRunLogs(context.Background(), taskRunID, level, page, size)
+	logs, _, err := r.db.GetPaginatedTaskRunLogs(context.Background(), taskRunID, level, page, size)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}

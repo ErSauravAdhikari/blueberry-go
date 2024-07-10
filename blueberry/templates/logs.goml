@@ -1,0 +1,77 @@
+<div id="logs-section">
+    <div class="my-4 flex justify-between items-center">
+        <div class="flex items-center space-x-4">
+            <h2 class="text-2xl font-semibold mt-4 mb-2 dark:text-white mr-4">Logs</h2>
+            <select id="logLevelFilter" class="mt-4 block p-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm" onchange="filterLogsByLevel()">
+                <option value=""
+                        {{if eq .Level "" }}
+                            selected
+                        {{end}}
+                >All</option>
+                <option value="info"
+                        {{if eq .Level "info" }}
+                            selected
+                        {{end}}
+                >Info</option>
+                <option value="success"
+                        {{if eq .Level "success" }}
+                            selected
+                        {{end}}
+                >Success</option>
+                <option value="error"
+                        {{if eq .Level "error" }}
+                            selected
+                        {{end}}
+                >Error</option>
+                <option value="debug"
+                        {{if eq .Level "debug" }}
+                            selected
+                        {{end}}
+                >Debug</option>
+            </select>
+        </div>
+        <div class="flex space-x-4">
+            {{if eq .Status "started"}}
+                <button onclick="openModal({{.ID}})" class="px-4 py-2 bg-red-500 text-white rounded mt-4">Cancel</button>
+            {{end}}
+            <button onclick="window.location.href='/execution/{{.ID}}/download'" class="px-4 py-2 bg-green-500 text-white rounded mt-4">Download Logs</button>
+        </div>
+    </div>
+    <div>
+        <div>
+            <div>
+                <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                    <table id="logs-table" class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Level</th>
+                            <th scope="col" class="px-6 py-3">Timestamp</th>
+                            <th scope="col" class="px-6 py-3">Message</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{range .Logs}}
+                            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700" data-level="{{.Level}}">
+                                <td class="px-6 py-4 font-medium {{if eq .Level "success"}}text-green-500 dark:text-green-400{{else if eq .Level "error"}}text-red-500 dark:text-red-400{{end}}">
+                                    {{.Level}}
+                                </td>
+                                <td class="px-6 py-4">{{.Timestamp | formatDateTime}}</td>
+                                <td class="px-6 py-4">{{.Message}}</td>
+                            </tr>
+                        {{end}}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-4 flex justify-between items-center">
+                    <button onclick="window.location.href='?page={{.PrevPage}}&size={{.PageSize}}&level={{.Level}}'" class="px-4 py-2 bg-blue-500 text-white rounded" {{if not .HasPrevPage}}disabled{{end}}>Previous</button>
+                    <span class="text-gray-700 dark:text-gray-300">Page {{.CurrentPage}} of {{.TotalPages}}</span>
+                    <button onclick="window.location.href='?page={{.NextPage}}&size={{.PageSize}}&level={{.Level}}'" class="px-4 py-2 bg-blue-500 text-white rounded" {{if not .HasNextPage}}disabled{{end}}>Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="my-4">
+        <a href="/task/{{.TaskName}}" class="text-blue-500 hover:underline mt-4">Back to task</a>
+    </div>
+</div>
+

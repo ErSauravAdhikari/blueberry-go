@@ -1,7 +1,9 @@
 package blueberry
 
 import (
+	"bytes"
 	"context"
+	"encoding/csv"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -172,20 +174,110 @@ func (r *BlueBerry) showExecution(c echo.Context) error {
 		}
 	}
 
+	// Get pagination parameters
+	pageParam := c.QueryParam("page")
+	sizeParam := c.QueryParam("size")
+	levelParam := c.QueryParam("level")
+
+	page, err := strconv.Atoi(pageParam)
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	size, err := strconv.Atoi(sizeParam)
+	if err != nil || size < 1 {
+		size = 5 // Default page size
+	}
+
+	if levelParam == "" {
+		levelParam = "all"
+	}
+
+	logs, totalLogs, err := r.db.GetPaginatedTaskRunLogs(context.Background(), taskRunID, levelParam, page, size)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	totalPages := (totalLogs + size - 1) / size
+
+	data := struct {
+		TaskRun
+		Logs        []TaskRunLog
+		CurrentPage int
+		PageSize    int
+		TotalPages  int
+		HasPrevPage bool
+		HasNextPage bool
+		PrevPage    int
+		NextPage    int
+		Level       string
+	}{
+		TaskRun:     execution,
+		Logs:        logs,
+		CurrentPage: page,
+		PageSize:    size,
+		TotalPages:  totalPages,
+		HasPrevPage: page > 1,
+		HasNextPage: page < totalPages,
+		PrevPage:    page - 1,
+		NextPage:    page + 1,
+		Level:       levelParam,
+	}
+
+	// Check if the request is from HTMX
+	if c.Request().Header.Get("HX-Request") == "true" {
+		return c.Render(http.StatusOK, "logs.goml", data)
+	}
+
+	return c.Render(http.StatusOK, "execution.goml", data)
+}
+
+// downloadLogs handles the download of task run logs
+func (r *BlueBerry) downloadLogs(c echo.Context) error {
+	executionID := c.Param("id")
+	taskRunID, err := strconv.Atoi(executionID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid execution ID"})
+	}
+
 	logs, err := r.db.GetTaskRunLogs(context.Background(), taskRunID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	data := struct {
-		TaskRun
-		Logs []TaskRunLog
-	}{
-		TaskRun: execution,
-		Logs:    logs,
+	csvData, err := logsToCSV(logs)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	return c.Render(http.StatusOK, "execution.goml", data)
+	return c.Blob(http.StatusOK, "text/csv", csvData)
+}
+
+// logsToCSV converts logs to CSV format
+func logsToCSV(logs []TaskRunLog) ([]byte, error) {
+	var buf bytes.Buffer
+	writer := csv.NewWriter(&buf)
+
+	// Write CSV header
+	writer.Write([]string{"ID", "TaskRunID", "Timestamp", "Level", "Message"})
+
+	// Write CSV rows
+	for _, log := range logs {
+		writer.Write([]string{
+			strconv.Itoa(log.ID),
+			strconv.Itoa(log.TaskRunID),
+			log.Timestamp.Format(time.RFC3339),
+			log.Level,
+			log.Message,
+		})
+	}
+
+	writer.Flush()
+	if err := writer.Error(); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }
 
 func (r *BlueBerry) cancelExecutionByIDWeb(c echo.Context) error {

@@ -5,7 +5,6 @@
     <title>Blueberry - Task Scheduler</title>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet"/>
     <script>
-        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
@@ -20,36 +19,38 @@
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-            <tr>
-                <th scope="col" class="px-6 py-3">
-                    Task Name
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    Schedule
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    Next Run At
-                </th>
-            </tr>
+                <tr>
+                    <th scope="col" class="px-6 py-3">Task Name</th>
+                    <th scope="col" class="px-6 py-3">Schedule</th>
+                    <th scope="col" class="px-6 py-3">Next Run At</th>
+                </tr>
             </thead>
             <tbody>
-            {{range .}}
-                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                        <a href="/task/{{.TaskName}}" class="text-blue-500 hover:underline dark:text-blue-300">{{.TaskName}}</a>
-                    </th>
-                    <td class="px-6 py-4">
-                        {{range .Schedules}}
-                            {{.Schedule}}
-                        {{end}}
-                    </td>
-                    <td class="px-6 py-4">
-                        {{range .Schedules}}
-                            {{.NextExecution | formatTimestamp }}
-                        {{end}}
-                    </td>
-                </tr>
-            {{end}}
+                {{range .}}
+                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            <a href="/task/{{.TaskName}}" class="text-blue-500 hover:underline dark:text-blue-300">{{.TaskName}}</a>
+                        </th>
+                        <td class="px-6 py-4">
+                            <ul class="space-y-1">
+                                {{range .Schedules}}
+                                    <li class="inline-block bg-indigo-100 text-indigo-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-300">
+                                        {{.Schedule}}
+                                    </li>
+                                {{end}}
+                            </ul>
+                        </td>
+                        <td class="px-6 py-4">
+                            <ul class="space-y-1">
+                                {{range .Schedules}}
+                                    <li class="inline-block bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
+                                        {{.NextExecution | formatTimestamp }}
+                                    </li>
+                                {{end}}
+                            </ul>
+                        </td>
+                    </tr>
+                {{end}}
             </tbody>
         </table>
     </div>

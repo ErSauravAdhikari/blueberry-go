@@ -5,7 +5,6 @@
     <title>Blueberry - Task Scheduler</title>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet"/>
     <script>
-        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
@@ -17,12 +16,16 @@
 {{ template "navbar.goml" . }}
 <div class="container mx-auto p-6">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-4xl font-bold">Task: {{.TaskName}}</h1>
+        <h1 class="text-4xl font-bold dark:text-white">Task: {{.TaskName}}</h1>
         <a href="/task/{{.TaskName}}/run"
-           class="text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Run</a>
+           class="text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+           Run
+        </a>
     </div>
+    
+    <!-- Schedules Section -->
     <section class="mb-6">
-        <h2 class="text-2xl font-semibold mb-4">Schedules</h2>
+        <h2 class="text-2xl font-semibold mb-4 dark:text-gray-200">Schedules</h2>
         <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
             <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -33,17 +36,27 @@
                 </thead>
                 <tbody>
                 {{range .Schedules}}
-                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                        <td class="px-6 py-4">{{.Schedule}}</td>
-                        <td class="px-6 py-4">{{.FormattedNextExecution}}</td>
+                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <td class="px-6 py-4">
+                            <span class="inline-block bg-indigo-100 text-indigo-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-300">
+                                {{.Schedule}}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-block bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
+                                {{.FormattedNextExecution}}
+                            </span>
+                        </td>
                     </tr>
                 {{end}}
                 </tbody>
             </table>
         </div>
     </section>
+    
+    <!-- Past Executions Section -->
     <section>
-        <h2 class="text-2xl font-semibold mb-4">Past Executions</h2>
+        <h2 class="text-2xl font-semibold mb-4 dark:text-gray-200">Past Executions</h2>
         <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
             <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -55,44 +68,49 @@
                 </thead>
                 <tbody>
                 {{range .Executions}}
-                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
                         <td class="px-6 py-4">
-                            <a href="/execution/{{.ID}}"
-                               class="text-blue-500 hover:underline">{{.FormattedStartTime}}</a>
+                            <a href="/execution/{{.ID}}" class="text-blue-500 hover:underline dark:text-blue-300">
+                                {{.FormattedStartTime}}
+                            </a>
                         </td>
                         <td class="px-6 py-4">
                             {{ if ne .Status "started" }}
                                 {{.FormattedEndTime}}
                             {{ else }}
-                                -
+                                <span class="text-gray-400 dark:text-gray-500">-</span>
                             {{end}}
                         </td>
                         <td class="px-6 py-4">
-                                <span class="{{if eq .Status "completed"}}text-green-500 dark:text-green-400{{else if eq .Status "failed"}}text-red-500 dark:text-red-400{{else}}text-gray-700 dark:text-gray-300{{end}}">
-                                    {{.Status}}
-                                </span>
+                            <span class="{{if eq .Status "completed"}}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300{{else if eq .Status "failed"}}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300{{else}}bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300{{end}} text-xs font-semibold px-2.5 py-0.5 rounded">
+                                {{.Status}}
+                            </span>
                         </td>
                     </tr>
                 {{end}}
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination Controls -->
         <div class="flex justify-between items-center mt-4">
             {{if gt .Page 1}}
-                <a href="?page={{sub .Page 1}}" class="text-blue-500 hover:underline">Previous</a>
+                <a href="?page={{sub .Page 1}}" class="text-blue-500 hover:underline dark:text-blue-300">Previous</a>
             {{else}}
-                <span class="text-gray-500">Previous</span>
+                <span class="text-gray-500 dark:text-gray-400">Previous</span>
             {{end}}
             <span>Page {{.Page}} of {{.TotalPages}}</span>
             {{if lt .Page .TotalPages}}
-                <a href="?page={{add .Page 1}}" class="text-blue-500 hover:underline">Next</a>
+                <a href="?page={{add .Page 1}}" class="text-blue-500 hover:underline dark:text-blue-300">Next</a>
             {{else}}
-                <span class="text-gray-500">Next</span>
+                <span class="text-gray-500 dark:text-gray-400">Next</span>
             {{end}}
         </div>
     </section>
+
+    <!-- Back Link -->
     <div class="mt-6">
-        <a href="/" class="text-blue-500 hover:underline">Back to all tasks</a>
+        <a href="/" class="text-blue-500 hover:underline dark:text-blue-300">Back to all tasks</a>
     </div>
 </div>
 {{ template "scripts.goml" . }}

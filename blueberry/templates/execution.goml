@@ -113,7 +113,7 @@
         <!-- Logs Section -->
         <div
             {{if eq .Status "started" }}
-                hx-get="/execution/{{.ID}}/logs?page={{.CurrentPage}}&size={{.PageSize}}&level={{.Level}}" 
+                hx-get="/execution/{{.ID}}?page={{.CurrentPage}}&size={{.PageSize}}&level={{.Level}}" 
                 hx-trigger="load, every 5s" hx-target="#logs-section" hx-swap="outerHTML"
             {{end}}
         >

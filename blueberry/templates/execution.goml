@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Blueberry - Task Scheduler</title>
+    <title>Blueberry - Execution Details</title>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet"/>
     <script src="https://unpkg.com/htmx.org@1.7.0"></script>
     <script>
-        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
-        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (localStorage.getItem('color-theme') === 'dark' ||
+            (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
@@ -21,193 +21,126 @@
         function closeModal() {
             document.getElementById('modal').classList.add('hidden');
         }
-
-        function updateAnalytics(level) {
-            const rows = document.querySelectorAll('table tbody tr');
-            const totalLogs = rows.length;
-            let visibleLogs = 0;
-            rows.forEach(row => {
-                if (level === 'all' || row.style.display !== 'none') {
-                    visibleLogs++;
-                }
-            });
-            document.getElementById('totalLogs').innerText = `Total Logs: ${totalLogs}`;
-            document.getElementById('visibleLogs').innerText = `Visible Logs: ${visibleLogs}`;
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            updateAnalytics('all');
-        });
-
-        function filterLogsByLevel() {
-            const level = document.getElementById('logLevelFilter').value;
-            const urlParams = new URLSearchParams(window.location.search);
-            if (level) {
-                urlParams.set('level', level);
-            } else {
-                urlParams.delete('level');
-            }
-            window.location.search = urlParams.toString();
-        }
     </script>
     <style>
+        /* Progress Indicator Styles */
         .progress {
             position: fixed;
             top: 0;
             z-index: 1000;
             height: 4px;
             width: 100%;
-            border-radius: 2px;
-            background-clip: padding-box;
-            overflow: hidden;
+            background-color: transparent;
         }
-        .progress .indeterminate:before {
-            content: "";
+        .progress .indeterminate {
             position: absolute;
-            background-color: inherit;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            will-change: left, right;
-            -webkit-animation: indeterminate 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395)
-            infinite;
-            animation: indeterminate 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite;
-        }
-        .progress .indeterminate:after {
-            content: "";
-            position: absolute;
-            background-color: inherit;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            will-change: left, right;
-            -webkit-animation: indeterminate-short 2.1s cubic-bezier(0.165, 0.84, 0.44, 1)
-            infinite;
-            animation: indeterminate-short 2.1s cubic-bezier(0.165, 0.84, 0.44, 1)
-            infinite;
-            -webkit-animation-delay: 1.15s;
-            animation-delay: 1.15s;
-        }
-        .progress {
-            display: none;
-        }
-        .htmx-request .progress {
-            display: inline;
-        }
-        .htmx-request.progress {
-            display: inline;
-        }
-        @-webkit-keyframes indeterminate {
-            0% {
-                left: -35%;
-                right: 100%;
-            }
-            60% {
-                left: 100%;
-                right: -90%;
-            }
-            100% {
-                left: 100%;
-                right: -90%;
-            }
+            background-color: #3b82f6; /* Blue-500 */
+            width: 0;
+            height: 100%;
+            animation: indeterminate 2s infinite;
         }
         @keyframes indeterminate {
             0% {
-                left: -35%;
-                right: 100%;
+                left: -100%;
+                width: 100%;
             }
-            60% {
+            50% {
                 left: 100%;
-                right: -90%;
+                width: 10%;
             }
             100% {
                 left: 100%;
-                right: -90%;
+                width: 0%;
             }
         }
-        @-webkit-keyframes indeterminate-short {
-            0% {
-                left: -200%;
-                right: 100%;
-            }
-            60% {
-                left: 107%;
-                right: -8%;
-            }
-            100% {
-                left: 107%;
-                right: -8%;
-            }
-        }
-        @keyframes indeterminate-short {
-            0% {
-                left: -200%;
-                right: 100%;
-            }
-            60% {
-                left: 107%;
-                right: -8%;
-            }
-            100% {
-                left: 107%;
-                right: -8%;
-            }
+        .htmx-request .progress {
+            display: block;
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100" hx-indicator=".progress">
-<div class="progress" style="height: 3px; background-color: white;">
-    <div class="indeterminate" style="background-color: red;"></div>
-</div>
-{{ template "navbar.goml" . }}
-<div class="container mx-auto p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold dark:text-white">Execution ID: {{.ID}}</h1>
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-800 dark:text-gray-100" hx-indicator=".progress">
+    <!-- Progress Indicator -->
+    <div class="progress hidden">
+        <div class="indeterminate"></div>
     </div>
-    <table class="table-auto w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 mb-4">
-        <tbody>
-        <tr>
-            <td class="px-6 py-2 font-medium text-gray-900 dark:text-gray-100">Task:</td>
-            <td class="px-6 py-2">{{.TaskName}}</td>
-        </tr>
-        <tr>
-            <td class="px-6 py-2 font-medium text-gray-900 dark:text-gray-100">Start Time:</td>
-            <td class="px-6 py-2">{{.StartTime | formatDateTime}}</td>
-        </tr>
-        <tr>
-            <td class="px-6 py-2 font-medium text-gray-900 dark:text-gray-100">End Time:</td>
-            <td class="px-6 py-2">{{if eq .Status "started"}}None{{else}}{{.EndTime | formatDateTime}}{{end}}</td>
-        </tr>
-        <tr>
-            <td class="px-6 py-2 font-medium text-gray-900 dark:text-gray-100">Status:</td>
-            <td class="px-6 py-2">{{.Status}}</td>
-        </tr>
-        </tbody>
-    </table>
 
-    <div
-            {{if eq .Status "started" }}
-                hx-get="/execution/{{.ID}}?page={{.CurrentPage}}&size={{.PageSize}}&level={{.Level}}" hx-trigger="load, every 5s" hx-target="#logs-section" hx-swap="outerHTML"
-            {{end}}
-    >
-        {{ template "logs.goml" . }}
-    </div>
-</div>
+    {{ template "navbar.goml" . }}
 
-<!-- Modal -->
-<div id="modal" class="w-2/3 fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
-    <div class="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6 max-w-sm mx-auto">
-        <h2 class="text-lg font-semibold mb-4 dark:text-white">Confirm Cancellation</h2>
-        <p class="mb-4 dark:text-gray-300">Are you sure you want to cancel this task?</p>
-        <form id="cancelForm" method="POST" onsubmit="closeModal()">
-            <div class="flex justify-end">
-                <button type="button" onclick="closeModal()" class="px-4 py-2 mr-2 bg-gray-500 text-white rounded">No</button>
-                <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded">Yes, Cancel</button>
+    <div class="container mx-auto p-6">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">Execution Details</h1>
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Execution ID: {{.ID}}</p>
+        </div>
+
+        <!-- Execution Information -->
+        <div class="bg-white dark:bg-gray-700 shadow rounded-lg p-8 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Task</p>
+                    <p class="text-lg font-medium text-gray-900 dark:text-gray-100 mt-1">{{.TaskName}}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Status</p>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1
+                        {{if eq .Status "completed"}}
+                            bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
+                        {{else if eq .Status "failed"}}
+                            bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300
+                        {{else if eq .Status "cancelled"}}
+                            bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300
+                        {{else if eq .Status "started"}}
+                            bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300
+                        {{else}}
+                            bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300
+                        {{end}}">
+                        {{.Status}}
+                    </span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Start Time</p>
+                    <p class="text-lg font-medium text-gray-900 dark:text-gray-100 mt-1">{{.StartTime | formatDateTime}}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">End Time</p>
+                    <p class="text-lg font-medium text-gray-900 dark:text-gray-100 mt-1">
+                        {{if eq .Status "started"}}In Progress{{else}}{{.EndTime | formatDateTime}}{{end}}
+                    </p>
+                </div>
             </div>
-        </form>
-    </div>
-</div>
+        </div>
 
-{{ template "scripts.goml" . }}
+        <!-- Logs Section -->
+        <div
+            {{if eq .Status "started" }}
+                hx-get="/execution/{{.ID}}/logs?page={{.CurrentPage}}&size={{.PageSize}}&level={{.Level}}" 
+                hx-trigger="load, every 5s" hx-target="#logs-section" hx-swap="outerHTML"
+            {{end}}
+        >
+            {{ template "logs.goml" . }}
+        </div>
+    </div>
+
+    <!-- Cancel Confirmation Modal -->
+    <div id="modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6 max-w-sm mx-auto">
+            <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Confirm Cancellation</h2>
+            <p class="mb-6 text-gray-600 dark:text-gray-300">Are you sure you want to cancel this execution?</p>
+            <form id="cancelForm" method="POST" onsubmit="closeModal()">
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeModal()" 
+                            class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md focus:outline-none">
+                        No
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md focus:outline-none">
+                        Yes, Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{ template "scripts.goml" . }}
 </body>
 </html>

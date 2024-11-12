@@ -30,12 +30,12 @@ const tasksPerPage = 20
 
 // formatTime formats a given time.Time to a readable string
 func formatTime(t time.Time) string {
-	return t.Format("2006-01-02 15:04:05")
+	return t.UTC().Format("2006-01-02 15:04:05")
 }
 
 // formatUnixTimestamp formats a given Unix timestamp to a readable string
 func formatUnixTimestamp(timestamp int64) string {
-	return time.Unix(timestamp, 0).Format("2006-01-02 15:04:05")
+	return time.Unix(timestamp, 0).UTC().Format("2006-01-02 15:04:05")
 }
 
 // Middleware to check cookie for web authentication

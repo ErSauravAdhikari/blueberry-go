@@ -5,43 +5,79 @@
     <title>Blueberry - Execute Task</title>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet"/>
     <script>
-        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
-        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (localStorage.getItem('color-theme') === 'dark' || 
+            (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
         }
     </script>
 </head>
-<body class="bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100">
-{{ template "navbar.goml" . }}
-<div class="container mx-auto p-6">
-    <h1 class="text-4xl font-bold mb-6">Execute Task: {{.TaskName}}</h1>
-    <form action="/task/{{.TaskName}}/execute" method="post" class="bg-white dark:bg-gray-900 shadow-lg rounded-lg px-8 pt-6 pb-8 mb-6">
-        {{range $field, $type := .Schema.Fields}}
-            <div class="mb-6">
-                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" for="{{$field}}">
-                    {{$field}}
-                </label>
-                {{if eq $type "string"}}
-                    <input name="{{$field}}" type="text" class="shadow appearance-none border dark:border-gray-700 rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 leading-tight focus:outline-none focus:shadow-outline">
-                {{else if eq $type "int"}}
-                    <input name="{{$field}}" type="number" class="shadow appearance-none border dark:border-gray-700 rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 leading-tight focus:outline-none focus:shadow-outline">
-                {{else if eq $type "bool"}}
-                    <input name="{{$field}}" type="checkbox" class="shadow appearance-none border dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 leading-tight focus:outline-none focus:shadow-outline">
-                {{else if eq $type "float"}}
-                    <input name="{{$field}}" type="number" step="any" class="shadow appearance-none border dark:border-gray-700 rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 leading-tight focus:outline-none focus:shadow-outline">
-                {{end}}
-            </div>
-        {{end}}
-        <div class="flex items-center justify-between mt-8">
-            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-                Run Task
-            </button>
-            <a href="/task/{{.TaskName}}" class="text-blue-500 hover:underline ml-4">Back to task</a>
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-800 dark:text-gray-100">
+    {{ template "navbar.goml" . }}
+    <div class="container mx-auto p-6">
+        <!-- Page Header -->
+        <div class="mb-10">
+            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">Execute Task: {{.TaskName}}</h1>
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Fill out the form below to execute the task.</p>
         </div>
-    </form>
-</div>
-{{ template "scripts.goml" . }}
+
+        <!-- Form Section -->
+        <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8">
+            <form action="/task/{{.TaskName}}/execute" method="post">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {{range $field, $type := .Schema.Fields}}
+                    <div>
+                        <label for="{{$field}}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{$field}}
+                        </label>
+                        {{if eq $type "string"}}
+                            <input type="text" name="{{$field}}" id="{{$field}}" 
+                                   class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm
+                                   focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-300
+                                   dark:focus:border-blue-500 dark:focus:ring-blue-500">
+                        {{else if eq $type "int"}}
+                            <input type="number" name="{{$field}}" id="{{$field}}"
+                                   class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm
+                                   focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-300
+                                   dark:focus:border-blue-500 dark:focus:ring-blue-500">
+                        {{else if eq $type "bool"}}
+                            <select name="{{$field}}" id="{{$field}}"
+                                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm
+                                    focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-300
+                                    dark:focus:border-blue-500 dark:focus:ring-blue-500">
+                                <option value="true">True</option>
+                                <option value="false">False</option>
+                            </select>
+                        {{else if eq $type "float"}}
+                            <input type="number" step="any" name="{{$field}}" id="{{$field}}"
+                                   class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm
+                                   focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-300
+                                   dark:focus:border-blue-500 dark:focus:ring-blue-500">
+                        {{end}}
+                    </div>
+                    {{end}}
+                </div>
+                <div class="mt-8 flex items-center justify-between">
+                    <button type="submit" 
+                            class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium
+                            rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2
+                            focus:ring-offset-2 focus:ring-blue-500">
+                        <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" 
+                             viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M14.752 11.168l-6.704-3.837A1 1 0 007 8.135v7.73a1 1 0 001.048.997l6.704-3.837a1 1 0 000-1.797z"/>
+                        </svg>
+                        Run Task
+                    </button>
+                    <a href="/task/{{.TaskName}}" 
+                       class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500">
+                        Back to Task
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    {{ template "scripts.goml" . }}
 </body>
 </html>

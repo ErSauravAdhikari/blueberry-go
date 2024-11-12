@@ -5,7 +5,6 @@
     <title>Blueberry - Login</title>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet"/>
     <script>
-        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
@@ -18,31 +17,28 @@
 <div class="bg-gray-100 text-gray-900 dark:bg-gray-800 flex items-center justify-center flex-1">
     <div class="bg-white dark:bg-gray-900 shadow-md rounded-lg p-8 max-w-lg w-full">
         <h1 class="text-3xl font-bold text-center mb-6 dark:text-gray-200">Welcome Back!</h1>
+        <!-- Error Message -->
+        {{ if .errorMessage }}
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6">
+            <span class="block sm:inline">{{ .errorMessage }}</span>
+        </div>
+        {{ end }}
         <form action="/login" method="post">
             <div class="mb-6">
-                <label for="username"
-                       class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Username</label>
-                <input type="text" id="username" name="username"
-                       class="shadow-sm rounded-md w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                       placeholder="Enter your username" required>
+                <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Username</label>
+                <input type="text" id="username" name="username" class="shadow-sm rounded-md w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter your username" required>
             </div>
             <div class="mb-6">
-                <label for="password"
-                       class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label>
-                <input type="password" id="password" name="password"
-                       class="shadow-sm rounded-md w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                       placeholder="Enter your password" required>
+                <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label>
+                <input type="password" id="password" name="password" class="shadow-sm rounded-md w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter your password" required>
             </div>
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center">
-                    <input type="checkbox" id="remember"
-                           class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 focus:outline-none">
-                    <label for="remember" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">Remember
-                        me</label>
+                    <input type="checkbox" id="remember" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 focus:outline-none">
+                    <label for="remember" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">Remember me</label>
                 </div>
             </div>
-            <button type="submit"
-                    class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                 Login
             </button>
         </form>

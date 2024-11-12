@@ -56,21 +56,26 @@ func (r *BlueBerry) serveLoginPage(c echo.Context) error {
 
 // Handle login form submission
 func (r *BlueBerry) handleLogin(c echo.Context) error {
-	username := c.FormValue("username")
-	password := c.FormValue("password")
+    username := c.FormValue("username")
+    password := c.FormValue("password")
 
-	r.usersMux.RLock()
-	defer r.usersMux.RUnlock()
-	if pass, ok := r.webOnlyPasswords[username]; ok && pass == password {
-		cookie := new(http.Cookie)
-		cookie.Name = "auth"
-		cookie.Value = "authenticated"
-		cookie.Expires = time.Now().Add(24 * time.Hour)
-		c.SetCookie(cookie)
-		return c.Redirect(http.StatusFound, "/")
-	}
-	return c.Redirect(http.StatusFound, "/login")
+    r.usersMux.RLock()
+    defer r.usersMux.RUnlock()
+    if pass, ok := r.webOnlyPasswords[username]; ok && pass == password {
+        cookie := new(http.Cookie)
+        cookie.Name = "auth"
+        cookie.Value = "authenticated"
+        cookie.Expires = time.Now().Add(24 * time.Hour)
+        c.SetCookie(cookie)
+        return c.Redirect(http.StatusFound, "/")
+    }
+
+    // If authentication fails, pass an error message to the template
+    return c.Render(http.StatusOK, "login.goml", map[string]interface{}{
+        "errorMessage": "Invalid username or password.",
+    })
 }
+
 
 // listTasks renders the index page with all tasks
 func (r *BlueBerry) listTasks(c echo.Context) error {

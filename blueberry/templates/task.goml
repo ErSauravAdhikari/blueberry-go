@@ -5,118 +5,149 @@
     <title>Blueberry - Task Scheduler</title>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet"/>
     <script>
-        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (localStorage.getItem('color-theme') === 'dark' ||
+            (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
         }
     </script>
 </head>
-<body class="bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100">
-{{ template "navbar.goml" . }}
-<div class="container mx-auto p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-4xl font-bold dark:text-white">Task: {{.TaskName}}</h1>
-        <a href="/task/{{.TaskName}}/run"
-           class="text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-           Run
-        </a>
-    </div>
-    
-    <!-- Schedules Section -->
-    <section class="mb-6">
-        <h2 class="text-2xl font-semibold mb-4 dark:text-gray-200">Schedules</h2>
-        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-            <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                <tr>
-                    <th scope="col" class="px-6 py-3">Schedule</th>
-                    <th scope="col" class="px-6 py-3">Next Scheduled At</th>
-                </tr>
-                </thead>
-                <tbody>
-                {{range .Schedules}}
-                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <td class="px-6 py-4">
-                            <span class="inline-block bg-indigo-100 text-indigo-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-300">
-                                {{.Schedule}}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="inline-block bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
-                                {{.FormattedNextExecution}}
-                            </span>
-                        </td>
-                    </tr>
-                {{end}}
-                </tbody>
-            </table>
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+    {{ template "navbar.goml" . }}
+    <div class="container mx-auto p-6">
+        <!-- Task Header -->
+        <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-10">
+            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white mb-4 md:mb-0">
+                Task: {{.TaskName}}
+            </h1>
+            <a href="/task/{{.TaskName}}/run"
+               class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+               <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" aria-hidden="true">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                         d="M14.752 11.168l-6.704-3.837A1 1 0 007 8.135v7.73a1 1 0 001.048.997l6.704-3.837a1 1 0 000-1.797z"/>
+               </svg>
+               Run Task
+            </a>
         </div>
-    </section>
-    
-    <!-- Past Executions Section -->
-    <section>
-        <h2 class="text-2xl font-semibold mb-4 dark:text-gray-200">Past Executions</h2>
-        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-            <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                <tr>
-                    <th scope="col" class="px-6 py-3">Start Time</th>
-                    <th scope="col" class="px-6 py-3">End Time</th>
-                    <th scope="col" class="px-6 py-3">Status</th>
-                </tr>
-                </thead>
-                <tbody>
+
+        <!-- Schedules Section -->
+        <section class="mb-14">
+            <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-8">Schedules</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {{range .Schedules}}
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-8">
+                    <div class="flex items-center">
+                        <div class="p-4 bg-indigo-500 text-white rounded-full">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2"
+                                 viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 8v4l3 3"/>
+                                <circle cx="12" cy="12" r="10"/>
+                            </svg>
+                        </div>
+                        <div class="ml-6">
+                            <p class="text-xl font-semibold text-gray-900 dark:text-gray-100">{{.Schedule}}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Next Run: {{.FormattedNextExecution}}</p>
+                        </div>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+        </section>
+
+
+        <!-- Past Executions Section -->
+        <section class="mt-10">
+            <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Past Executions</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {{range .Executions}}
-                    <tr class="execution-row bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <td class="px-6 py-4 start-time" data-time="{{.FormattedStartTime}}">
-                            <a href="/execution/{{.ID}}" class="text-blue-500 hover:underline dark:text-blue-300">
-                                <span class="inline-block bg-blue-100 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
-                                    {{.FormattedStartTime}}
-                                </span>
-                            </a>
-                        </td>
-                        <td class="px-6 py-4">
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Start Time</p>
+                            <p class="text-lg font-medium text-gray-900 dark:text-gray-100">{{.FormattedStartTime}}</p>
+                        </div>
+                        <a href="/execution/{{.ID}}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500">
+                            Details
+                        </a>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">End Time</p>
+                        <p class="text-lg font-medium text-gray-900 dark:text-gray-100">
                             {{ if ne .Status "started" }}
-                                <span class="inline-block end-time bg-gray-100 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300" data-time="{{.FormattedEndTime}}">
-                                    {{.FormattedEndTime}}
-                                </span>
+                                {{.FormattedEndTime}}
                             {{ else }}
-                                <span class="text-gray-400 dark:text-gray-500 end-time" data-time="-">-</span>
+                                In Progress
                             {{end}}
-                        </td>
-                        <td class="px-6 py-4 status" data-status="{{.Status}}">
-                        <span class="{{if eq .Status "completed"}}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300{{else if eq .Status "failed"}}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300{{else if eq .Status "cancelled"}}bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300{{else}}bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300{{end}} text-xs font-semibold px-2.5 py-0.5 rounded">
+                        </p>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Status</p>
+                        <span class="inline-flex items-center px-3 py-1 mt-1 rounded-sm text-sm font-medium
+                            {{if eq .Status "completed"}}
+                                bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
+                            {{else if eq .Status "failed"}}
+                                bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300
+                            {{else if eq .Status "cancelled"}}
+                                bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300
+                            {{else}}
+                                bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300
+                            {{end}}">
                             {{.Status}}
                         </span>
-                    </td>
-                    </tr>
+                    </div>
+                </div>
                 {{end}}
-                </tbody>
-            </table>
-        </div>
+            </div>
 
-        <!-- Pagination Controls -->
-        <div class="flex justify-between items-center mt-4">
-            {{if gt .Page 1}}
-                <a href="?page={{sub .Page 1}}" class="text-blue-500 hover:underline dark:text-blue-300">Previous</a>
-            {{else}}
-                <span class="text-gray-500 dark:text-gray-400">Previous</span>
-            {{end}}
-            <span>Page {{.Page}} of {{.TotalPages}}</span>
-            {{if lt .Page .TotalPages}}
-                <a href="?page={{add .Page 1}}" class="text-blue-500 hover:underline dark:text-blue-300">Next</a>
-            {{else}}
-                <span class="text-gray-500 dark:text-gray-400">Next</span>
-            {{end}}
-        </div>
-    </section>
+            <!-- Pagination Controls -->
+            <div class="flex justify-between items-center mt-8">
+                {{if gt .Page 1}}
+                <a href="?page={{sub .Page 1}}"
+                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border
+                   border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700">
+                    Previous
+                </a>
+                {{else}}
+                <span
+                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-400 bg-white border
+                   border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-600 dark:border-gray-700">
+                    Previous
+                </span>
+                {{end}}
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Page {{.Page}} of {{.TotalPages}}
+                </p>
+                {{if lt .Page .TotalPages}}
+                <a href="?page={{add .Page 1}}"
+                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border
+                   border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700">
+                    Next
+                </a>
+                {{else}}
+                <span
+                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-400 bg-white border
+                   border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-600 dark:border-gray-700">
+                    Next
+                </span>
+                {{end}}
+            </div>
+        </section>
 
-    <!-- Back Link -->
-    <div class="mt-6">
-        <a href="/" class="text-blue-500 hover:underline dark:text-blue-300">Back to all tasks</a>
+        <!-- Back Link -->
+        <div class="mt-12 text-center">
+            <a href="/"
+               class="inline-flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500">
+                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"
+                     viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5"/>
+                    <path d="M12 19l-7-7 7-7"/>
+                </svg>
+                Back to all tasks
+            </a>
+        </div>
     </div>
-</div>
-{{ template "scripts.goml" . }}
+    {{ template "scripts.goml" . }}
 </body>
 </html>

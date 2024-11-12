@@ -26,7 +26,7 @@ type TemplateTaskRun struct {
 	Status             string
 }
 
-const tasksPerPage = 20
+const tasksPerPage = 15
 
 // formatTime formats a given time.Time to a readable string
 func formatTime(t time.Time) string {

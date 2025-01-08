@@ -1,6 +1,6 @@
 <nav class="bg-white border-gray-200 dark:bg-gray-900">
     <div class="container mx-auto flex flex-wrap items-center justify-between p-4">
-        <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
+        <a href="{{ basePath }}" class="flex items-center space-x-3 rtl:space-x-reverse">
             <img src="https://i.imgur.com/jnYu7eS.png" class="h-8" alt="Blueberry Logo"/>
             <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Blueberry</span>
         </a>

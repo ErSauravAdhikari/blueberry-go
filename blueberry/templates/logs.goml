@@ -71,7 +71,7 @@
         </div>
     </div>
     <div class="my-4">
-        <a href="/task/{{.TaskName}}" class="text-blue-500 hover:underline mt-4">Back to task</a>
+        <a href="{{ basePath }}/task/{{.TaskName}}" class="text-blue-500 hover:underline mt-4">Back to task</a>
     </div>
 </div>
 

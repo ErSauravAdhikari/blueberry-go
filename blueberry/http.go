@@ -13,13 +13,13 @@ type Config struct {
 }
 
 // setupCore initializes the Echo instance with common middleware
-func (r *BlueBerry) setupCore() (*echo.Echo, error) {
+func (r *BlueBerry) setupCore(basePath string) (*echo.Echo, error) {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
 	// Load templates
-	templates, err := loadTemplates()
+	templates, err := loadTemplates(basePath)
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func (r *BlueBerry) setupCore() (*echo.Echo, error) {
 
 // GetEcho returns a configured Echo instance with routes mounted at specified paths
 func (r *BlueBerry) GetEcho(cfg *Config) (*echo.Echo, error) {
-	e, err := r.setupCore()
+	e, err := r.setupCore(cfg.WebUIPath)
 	if err != nil {
 		return nil, err
 	}

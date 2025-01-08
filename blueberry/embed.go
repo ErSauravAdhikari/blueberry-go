@@ -2,11 +2,13 @@ package blueberry
 
 import (
 	"embed"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/gommon/log"
 	"html/template"
 	"io"
+	"strings"
 	"time"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
 )
 
 //go:embed templates/*.goml
@@ -43,12 +45,23 @@ func formatTimestamp(timestamp int64) string {
 }
 
 // loadTemplates loads and parses the templates with additional functions
-func loadTemplates() (*template.Template, error) {
+func loadTemplates(basePath string) (*template.Template, error) {
+	var basePathWithoutSlash string
+
+	if strings.HasSuffix(basePath, "/") {
+		basePathWithoutSlash = strings.TrimSuffix(basePath, "/")
+	} else {
+		basePathWithoutSlash = basePath
+	}
+
 	t := template.Must(template.New("").Funcs(template.FuncMap{
 		"add":             add,
 		"sub":             sub,
 		"formatDateTime":  formatDateTime,
 		"formatTimestamp": formatTimestamp,
+		"basePath": func() string {
+			return basePathWithoutSlash
+		},
 	}).ParseFS(content, "templates/*.goml"))
 
 	return t, nil

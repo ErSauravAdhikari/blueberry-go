@@ -221,7 +221,7 @@ func (db *MongoDB) GetPaginatedTaskRunLogs(ctx context.Context, taskRunID int, l
 	}
 
 	// Sort by 'starttime' in descending order so that we get the latest logs first
-	options := options.Find().SetLimit(int64(size)).SetSkip(int64((page - 1) * size)).SetSort(bson.M{"starttime": -1})
+	options := options.Find().SetLimit(int64(size)).SetSkip(int64((page - 1) * size)).SetSort(bson.M{"timestamp": -1})
 	cursor, err := db.taskRunLogs.Find(ctx, filter, options)
 	if err != nil {
 		return nil, 0, err

@@ -26,12 +26,14 @@ type Task struct {
 }
 
 type BlueBerry struct {
-	db        DB
-	cron      *cron.Cron
-	tasks     sync.Map
-	taskMux   sync.Mutex
-	schedules sync.Map // To store schedules per task
-	executing sync.Map // To track currently executing tasks
+	db      DB
+	cron    *cron.Cron
+	tasks   sync.Map
+	taskMux sync.Mutex
+
+	schedulesMux sync.RWMutex
+	schedules    sync.Map // To store schedules per task
+	executing    sync.Map // To track currently executing tasks
 
 	apiKeys          map[string]string
 	apiKeysMux       sync.RWMutex
@@ -173,16 +175,16 @@ func validateType(params TaskParams, key string, expectedType TaskParamType) err
 	}
 }
 
-func (t *Task) RegisterSchedule(params TaskParams, schedule string) error {
+func (t *Task) RegisterSchedule(params TaskParams, schedule string) (ScheduleInfo, error) {
 	if err := t.ValidateParams(params); err != nil {
-		return err
+		return ScheduleInfo{}, err
 	}
 
 	entryID, err := t.blueBerry.cron.AddFunc(schedule, func() {
 		t.ExecuteNow(params)
 	})
 	if err != nil {
-		return err
+		return ScheduleInfo{}, err
 	}
 
 	// Store the schedule with the entry ID
@@ -194,7 +196,26 @@ func (t *Task) RegisterSchedule(params TaskParams, schedule string) error {
 	}
 	t.blueBerry.storeSchedule(t.name, scheduleInfo)
 
-	return nil
+	return scheduleInfo, nil
+}
+
+func (t *Task) DeleteSchedule(entryID cron.EntryID) {
+	t.blueBerry.schedulesMux.Lock()
+	defer t.blueBerry.schedulesMux.Unlock()
+
+	// Remove from CRON
+	t.blueBerry.cron.Remove(entryID)
+
+	// Remove from the local schedule database (So that it's not shown in web client)
+	if schedules, ok := t.blueBerry.schedules.Load(t.name); ok {
+		updatedSchedules := make([]ScheduleInfo, 0)
+		for _, schedule := range schedules.([]ScheduleInfo) {
+			if schedule.EntryID != entryID {
+				updatedSchedules = append(updatedSchedules, schedule)
+			}
+		}
+		t.blueBerry.schedules.Store(t.name, updatedSchedules)
+	}
 }
 
 func (t *Task) ExecuteNow(params TaskParams) (int, error) {

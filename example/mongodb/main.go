@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
-	rasberry "github.com/ersauravadhikari/blueberry-go/blueberry"
-	"github.com/ersauravadhikari/blueberry-go/blueberry/store"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	rasberry "github.com/ersauravadhikari/blueberry-go/blueberry"
+	"github.com/ersauravadhikari/blueberry-go/blueberry/store"
 )
 
 var (
@@ -61,23 +62,27 @@ func main() {
 		return
 	}
 
-	if err := tsk1.RegisterSchedule(rasberry.TaskParams{
+	sc, err := tsk1.RegisterSchedule(rasberry.TaskParams{
 		"param1": "value1",
 		"param2": 1,
 		"param3": true,
-	}, "@every 1m"); err != nil {
+	}, "@every 1m")
+
+	if err != nil {
 		log.Fatalf("Failed to register schedule: %v", err)
 	}
 
-	// Can be executed directly from code without the scheduler as well
-	//_, err = tsk1.ExecuteNow(rasberry.TaskParams{
-	//	"param1": "value1",
-	//	"param2": 1,
-	//	"param3": true,
-	//})
-	//if err != nil {
-	//	return
-	//}
+	// schedule var contains the schedule information
+	fmt.Printf("Schedule with ID: %v has been registerd with CRON %s", sc.EntryID, sc.Schedule)
+
+	_, err = tsk1.ExecuteNow(rasberry.TaskParams{
+		"param1": "value1",
+		"param2": 1,
+		"param3": true,
+	})
+	if err != nil {
+		log.Fatalf("Unable to execute right now")
+	}
 
 	// Handle system signals for graceful shutdown
 	sigChan := make(chan os.Signal, 1)

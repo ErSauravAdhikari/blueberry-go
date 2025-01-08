@@ -127,11 +127,13 @@ if err != nil {
 	return
 }
 
-if err := tsk1.RegisterSchedule(blueberry.TaskParams{
+sc, err := tsk1.RegisterSchedule(blueberry.TaskParams{
 	"param1": "value1",
 	"param2": 1,
 	"param3": true,
-}, "@every 1m"); err != nil {
+}, "@every 1m")
+
+if err != nil {
 	log.Fatalf("Failed to register schedule: %v", err)
 }
 
@@ -141,18 +143,33 @@ if err != nil {
 	return
 }
 
-if err := tsk2.RegisterSchedule(blueberry.TaskParams{
+sc1, err := tsk2.RegisterSchedule(blueberry.TaskParams{
 	"param2": "value2",
-}, blueberry.RunEvery5Minutes); err != nil {
+}, blueberry.RunEvery5Minutes)
+
+if err != nil {
 	log.Fatalf("Failed to register schedule: %v", err)
 }
 
-if err := tsk2.RegisterSchedule(blueberry.TaskParams{
+sc2, err := tsk2.RegisterSchedule(blueberry.TaskParams{
 	"param2": "value3",
-}, blueberry.RunEvery10Minutes); err != nil {
+}, blueberry.RunEvery10Minutes)
+
+if err != nil {
 	log.Fatalf("Failed to register schedule: %v", err)
 }
 ```
+Here the variables sc, sc1 and sc2 contains information about the schedule, as well as an entry ID necessary to delete the schedule. In order to remove it
+
+```go
+tsk2.DeleteSchedule(sc2.EntryID) // Entry ID is unique for executing functions.
+```
+
+If you want to update the schedule dynamically then you will need to
+- Remove the current schedule
+- Register a new schedule with same task but with different parameters or scheduling information
+
+Make sure to handle this in a thread safe manner, if you are running this concurrently.
 
 #### 4. Handle System Signals
 
@@ -223,28 +240,11 @@ if err != nil {
 	return
 }
 
-if err := tsk1.RegisterSchedule(blueberry.TaskParams{
+sc, err := tsk1.RegisterSchedule(blueberry.TaskParams{
 	"param1": "value1",
-}, blueberry.RunEveryMinute); err != nil {
-	log.Fatalf("Failed to register schedule: %v", err)
-}
+}, blueberry.RunEveryMinute)
 
-// Register and schedule Task 2 with two different schedules
-tsk2, err := rb.RegisterTask("task_2", task2, task2Schema)
 if err != nil {
-	fmt.Printf("Failed to register task: %v\n", err)
-	return
-}
-
-if err := tsk2.RegisterSchedule(blueberry.TaskParams{
-	"param2": "value2",
-}, blueberry.RunEvery5Minutes); err != nil {
-	log.Fatalf("Failed to register schedule: %v", err)
-}
-
-if err := tsk2.RegisterSchedule(blueberry.TaskParams{
-	"param2": "value3",
-}, blueberry.RunEvery10Minutes); err != nil {
 	log.Fatalf("Failed to register schedule: %v", err)
 }
 ```
@@ -254,11 +254,9 @@ if err := tsk2.RegisterSchedule(blueberry.TaskParams{
 You can also use custom cron expressions to schedule tasks. Here’s how you can use a custom cron expression:
 
 ```go
-if err := tsk1.RegisterSchedule(blueberry.TaskParams{
+sc, err := tsk1.RegisterSchedule(blueberry.TaskParams{
 	"param1": "value1",
-}, "0 0 * * *"); err != nil {
-	log.Fatalf("Failed to register schedule: %v", err)
-}
+}, "0 0 * * *")
 ```
 
 In this example, the task will run every day at midnight.
@@ -340,18 +338,11 @@ func main() {
 		log.Fatalf("Failed to register task: %v", err)
 	}
 
-	if err := tsk1.RegisterSchedule(blueberry.TaskParams{
+	_, err := tsk1.RegisterSchedule(blueberry.TaskParams{
 		"param1": "value1",
-	}, "@every 1m"); err != nil {
-		log.Fatalf("Failed to register schedule: %v", err)
-	}
-
-	tsk2, err := rb.RegisterTask("task_2", task1, task2Schema)
+	}, "@every 1m")
+	
 	if err != nil {
-		log.Fatalf("Failed to register task: %v", err)
-	}
-
-	if err := tsk2.RegisterSchedule(blueberry.TaskParams{}, blueberry.RunEveryMinute); err != nil {
 		log.Fatalf("Failed to register schedule: %v", err)
 	}
 

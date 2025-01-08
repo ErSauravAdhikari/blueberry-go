@@ -104,6 +104,9 @@ func main() {
 		log.Fatalf("Unable to execute right now")
 	}
 
+	// You can also remove the schedule dynamically.
+	tsk1.DeleteSchedule(sc.EntryID) // Remove the registered schedule
+
 	// Handle system signals for graceful shutdown
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)

@@ -1,6 +1,8 @@
 package blueberry
 
 import (
+	"net/http"
+
 	_ "github.com/ersauravadhikari/blueberry-go/docs"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -8,8 +10,9 @@ import (
 )
 
 type Config struct {
-	WebUIPath string // base path for web UI routes (e.g., "/bb_admin")
-	APIPath   string // base path for API routes (e.g., "/bb_api")
+	WebUIPath       string // base path for web UI routes (e.g., "/bb_admin")
+	APIPath         string // base path for API routes (e.g., "/bb_api")
+	HealthCheckPath string // base path for Healthcheck endpoint (e.g. "/healthcheck")
 }
 
 // setupCore initializes the Echo instance with common middleware
@@ -37,6 +40,7 @@ func (r *BlueBerry) GetEcho(cfg *Config) (*echo.Echo, error) {
 	// Default paths if not specified
 	webPath := "/"
 	apiPath := "/api"
+	healthCheckPath := "/health"
 
 	if cfg != nil {
 		if cfg.WebUIPath != "" {
@@ -44,6 +48,9 @@ func (r *BlueBerry) GetEcho(cfg *Config) (*echo.Echo, error) {
 		}
 		if cfg.APIPath != "" {
 			apiPath = cfg.APIPath
+		}
+		if cfg.HealthCheckPath != "" {
+			healthCheckPath = cfg.HealthCheckPath
 		}
 	}
 
@@ -57,6 +64,14 @@ func (r *BlueBerry) GetEcho(cfg *Config) (*echo.Echo, error) {
 
 	// Swagger docs endpoint
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
+
+	e.GET(healthCheckPath, func(c echo.Context) error {
+		return c.JSON(http.StatusOK, map[string]any{
+			"status": "ok",
+			"health": "health be good",
+			"by":     "blueberry-auto-check",
+		})
+	})
 
 	return e, nil
 }

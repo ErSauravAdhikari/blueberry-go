@@ -41,14 +41,53 @@
                     <div class="flex items-center">
                         <div class="p-4 bg-indigo-500 text-white rounded-full">
                             <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2"
-                                 viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M12 8v4l3 3"/>
                                 <circle cx="12" cy="12" r="10"/>
                             </svg>
                         </div>
-                        <div class="ml-6">
-                            <p class="text-xl font-semibold text-gray-900 dark:text-gray-100">{{.Schedule}}</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Next Run: {{.FormattedNextExecution}}</p>
+                        <div class="ml-6 flex-grow">
+                            <div class="flex justify-between items-center">
+                                <span class="px-3 py-1 text-xs font-semibold bg-gray-100 dark:bg-gray-600 rounded-full">
+                                    ID: {{.EntryID}}
+                                </span>
+                                <button data-modal-target="paramsModal-{{.EntryID}}" data-modal-toggle="paramsModal-{{.EntryID}}"
+                                        class="text-blue-500 hover:text-blue-600 text-sm">
+                                    Show Parameters
+                                </button>
+                            </div>
+                            <p class="text-xl font-semibold text-gray-900 dark:text-gray-100 mt-2">{{.Schedule}}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                Next Run: {{.FormattedNextExecution}}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parameters Modal -->
+                <div id="paramsModal-{{.EntryID}}" tabindex="-1" aria-hidden="true"
+                    class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                    <div class="relative w-full max-w-2xl max-h-full">
+                        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                            <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+                                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                    Schedule Parameters
+                                </h3>
+                                <button type="button"
+                                        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                                        data-modal-hide="paramsModal-{{.EntryID}}">
+                                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 14 14">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="p-6 space-y-6">
+                                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                                    <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{formatJSON .Params}}</pre>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -60,46 +99,86 @@
         <!-- Past Executions Section -->
         <section class="mt-10">
             <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-6">Past Executions</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {{range .Executions}}
-                <div class="bg-white dark:bg-gray-700 shadow rounded-lg p-6">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Start Time</p>
-                            <p class="text-lg font-medium text-gray-900 dark:text-gray-100">{{.FormattedStartTime}}</p>
-                        </div>
-                        <a href="{{ basePath }}/execution/{{.ID}}" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-500">
-                            Details
-                        </a>
-                    </div>
-                    <div class="mt-4">
-                        <p class="text-sm text-gray-500 dark:text-gray-400">End Time</p>
-                        <p class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                            {{ if ne .Status "started" }}
-                                {{.FormattedEndTime}}
-                            {{ else }}
-                                In Progress
-                            {{end}}
-                        </p>
-                    </div>
-                    <div class="mt-4">
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Status</p>
-                        <span class="inline-flex items-center px-3 py-1 mt-1 rounded-sm text-sm font-medium
-                            {{if eq .Status "completed"}}
-                                bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300
-                            {{else if eq .Status "failed"}}
-                                bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300
-                            {{else if eq .Status "cancelled"}}
-                                bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300
-                            {{else}}
-                                bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300
-                            {{end}}">
-                            {{.Status}}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {{range .Executions}}
+                    <div class="bg-white dark:bg-gray-700 shadow rounded-lg p-6 space-y-4">
+                        <span class="px-3 py-1 text-xs font-semibold bg-gray-100 dark:bg-gray-600 rounded-full">
+                            ID: {{.ID}}
                         </span>
+
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Start Time</p>
+                                <p class="text-lg font-medium text-gray-900 dark:text-gray-100">{{.FormattedStartTime}}</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button data-modal-target="executionParamsModal-{{.ID}}" 
+                                        data-modal-toggle="executionParamsModal-{{.ID}}"
+                                        class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-500">
+                                    Parameters
+                                </button>
+                                <a href="{{ basePath }}/execution/{{.ID}}" 
+                                class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-500">
+                                    Details
+                                </a>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">End Time</p>
+                            <p class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                                {{ if ne .Status "started" }}
+                                    {{.FormattedEndTime}}
+                                {{ else }}
+                                    In Progress
+                                {{end}}
+                            </p>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Status</p>
+                            <span class="inline-flex items-center px-3 py-1 mt-1 rounded-sm text-sm font-medium
+                                {{if eq .Status "completed"}}
+                                    bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300
+                                {{else if eq .Status "failed"}}
+                                    bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300
+                                {{else if eq .Status "cancelled"}}
+                                    bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300
+                                {{else}}
+                                    bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300
+                                {{end}}">
+                                {{.Status}}
+                            </span>
+                        </div>
                     </div>
+
+                    <!-- Execution Parameters Modal -->
+                    <div id="executionParamsModal-{{.ID}}" tabindex="-1" aria-hidden="true"
+                        class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                        <div class="relative w-full max-w-2xl max-h-full">
+                            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                                <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+                                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                        Execution Parameters
+                                    </h3>
+                                    <button type="button"
+                                            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                                            data-modal-hide="executionParamsModal-{{.ID}}">
+                                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                            viewBox="0 0 14 14">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="p-6 space-y-6">
+                                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                                        <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{formatJSON .Params}}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{end}}
                 </div>
-                {{end}}
-            </div>
 
             <!-- Pagination Controls -->
             <div class="flex justify-between items-center mt-8">

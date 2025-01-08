@@ -16,6 +16,8 @@ import (
 type TemplateScheduleInfo struct {
 	Schedule               string
 	FormattedNextExecution string
+	Params                 map[string]any
+	EntryID                int
 }
 
 // TemplateTaskRun is used for rendering task runs in the template
@@ -24,6 +26,7 @@ type TemplateTaskRun struct {
 	FormattedStartTime string
 	FormattedEndTime   string
 	Status             string
+	Params             map[string]any
 }
 
 const tasksPerPage = 15
@@ -56,26 +59,25 @@ func (r *BlueBerry) serveLoginPage(c echo.Context) error {
 
 // Handle login form submission
 func (r *BlueBerry) handleLogin(c echo.Context) error {
-    username := c.FormValue("username")
-    password := c.FormValue("password")
+	username := c.FormValue("username")
+	password := c.FormValue("password")
 
-    r.usersMux.RLock()
-    defer r.usersMux.RUnlock()
-    if pass, ok := r.webOnlyPasswords[username]; ok && pass == password {
-        cookie := new(http.Cookie)
-        cookie.Name = "auth"
-        cookie.Value = "authenticated"
-        cookie.Expires = time.Now().Add(24 * time.Hour)
-        c.SetCookie(cookie)
-        return c.Redirect(http.StatusFound, "/")
-    }
+	r.usersMux.RLock()
+	defer r.usersMux.RUnlock()
+	if pass, ok := r.webOnlyPasswords[username]; ok && pass == password {
+		cookie := new(http.Cookie)
+		cookie.Name = "auth"
+		cookie.Value = "authenticated"
+		cookie.Expires = time.Now().Add(24 * time.Hour)
+		c.SetCookie(cookie)
+		return c.Redirect(http.StatusFound, "/")
+	}
 
-    // If authentication fails, pass an error message to the template
-    return c.Render(http.StatusOK, "login.goml", map[string]interface{}{
-        "errorMessage": "Invalid username or password.",
-    })
+	// If authentication fails, pass an error message to the template
+	return c.Render(http.StatusOK, "login.goml", map[string]interface{}{
+		"errorMessage": "Invalid username or password.",
+	})
 }
-
 
 // listTasks renders the index page with all tasks
 func (r *BlueBerry) listTasks(c echo.Context) error {
@@ -128,6 +130,8 @@ func (r *BlueBerry) showTask(c echo.Context) error {
 		templateSchedules = append(templateSchedules, TemplateScheduleInfo{
 			Schedule:               schedule.Schedule,
 			FormattedNextExecution: formatUnixTimestamp(schedule.NextExecution),
+			EntryID:                int(schedule.EntryID),
+			Params:                 schedule.Params,
 		})
 	}
 
@@ -138,6 +142,7 @@ func (r *BlueBerry) showTask(c echo.Context) error {
 			FormattedStartTime: formatTime(execution.StartTime),
 			FormattedEndTime:   formatTime(execution.EndTime),
 			Status:             execution.Status,
+			Params:             execution.Params,
 		})
 	}
 

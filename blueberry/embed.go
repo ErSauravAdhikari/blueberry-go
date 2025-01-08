@@ -2,6 +2,7 @@ package blueberry
 
 import (
 	"embed"
+	"encoding/json"
 	"html/template"
 	"io"
 	"strings"
@@ -61,6 +62,13 @@ func loadTemplates(basePath string) (*template.Template, error) {
 		"formatTimestamp": formatTimestamp,
 		"basePath": func() string {
 			return basePathWithoutSlash
+		},
+		"formatJSON": func(v interface{}) string {
+			b, err := json.MarshalIndent(v, "", "    ")
+			if err != nil {
+				return err.Error()
+			}
+			return string(b)
 		},
 	}).ParseFS(content, "templates/*.goml"))
 

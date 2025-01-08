@@ -121,7 +121,7 @@ func (r *BlueBerry) setupAPIRoutes(api *echo.Group) {
 // @Success 200 {object} string "API server started"
 // @Router / [get]
 func (r *BlueBerry) RunAPI(port string) error {
-	e, err := r.GetEcho(nil) // Use default paths
+	e, err := r.GetEcho(&Config{})
 	if err != nil {
 		return err
 	}

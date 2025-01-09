@@ -23,7 +23,7 @@
             <span class="block sm:inline">{{ .errorMessage }}</span>
         </div>
         {{ end }}
-        <form action="/login" method="post">
+        <form action='{{ "/login" | getPath }}' method="post">
             <div class="mb-6">
                 <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Username</label>
                 <input type="text" id="username" name="username" class="shadow-sm rounded-md w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter your username" required>

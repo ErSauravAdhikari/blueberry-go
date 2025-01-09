@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"html/template"
 	"io"
-	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -46,23 +45,14 @@ func formatTimestamp(timestamp int64) string {
 }
 
 // loadTemplates loads and parses the templates with additional functions
-func loadTemplates(basePath string) (*template.Template, error) {
-	var basePathWithoutSlash string
-
-	if strings.HasSuffix(basePath, "/") {
-		basePathWithoutSlash = strings.TrimSuffix(basePath, "/")
-	} else {
-		basePathWithoutSlash = basePath
-	}
-
+func loadTemplates(cfg *InterfaceConfig) (*template.Template, error) {
 	t := template.Must(template.New("").Funcs(template.FuncMap{
 		"add":             add,
 		"sub":             sub,
 		"formatDateTime":  formatDateTime,
 		"formatTimestamp": formatTimestamp,
-		"basePath": func() string {
-			return basePathWithoutSlash
-		},
+		"basePath":        cfg.getWebUIBasePathParsed,
+		"getPath":         cfg.getURLForPath,
 		"formatJSON": func(v interface{}) string {
 			b, err := json.MarshalIndent(v, "", "    ")
 			if err != nil {

@@ -2,6 +2,7 @@ package blueberry
 
 import (
 	"net/http"
+	"strings"
 
 	_ "github.com/ersauravadhikari/blueberry-go/docs"
 	"github.com/labstack/echo/v4"
@@ -9,20 +10,27 @@ import (
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
-type Config struct {
-	WebUIPath       string // base path for web UI routes (e.g., "/bb_admin")
-	APIPath         string // base path for API routes (e.g., "/bb_api")
-	HealthCheckPath string // base path for Healthcheck endpoint (e.g. "/healthcheck")
+func (i *InterfaceConfig) getWebUIBasePathParsed() string {
+	return strings.TrimSuffix(i.WebUIPath, "/")
+}
+
+func (i *InterfaceConfig) getURLForPath(path string) string {
+	basePath := i.getWebUIBasePathParsed()
+	cleanPath := strings.TrimPrefix(path, "/")
+	if basePath == "" {
+		return "/" + cleanPath
+	}
+	return basePath + "/" + cleanPath
 }
 
 // setupCore initializes the Echo instance with common middleware
-func (r *BlueBerry) setupCore(basePath string) (*echo.Echo, error) {
+func (r *BlueBerry) setupCore(cfg *InterfaceConfig) (*echo.Echo, error) {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
 	// Load templates
-	templates, err := loadTemplates(basePath)
+	templates, err := loadTemplates(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -31,11 +39,7 @@ func (r *BlueBerry) setupCore(basePath string) (*echo.Echo, error) {
 }
 
 // GetEcho returns a configured Echo instance with routes mounted at specified paths
-func (r *BlueBerry) GetEcho(cfg *Config) (*echo.Echo, error) {
-	e, err := r.setupCore(cfg.WebUIPath)
-	if err != nil {
-		return nil, err
-	}
+func (r *BlueBerry) GetEcho(cfg *InterfaceConfig) (*echo.Echo, error) {
 
 	// Default paths if not specified
 	webPath := "/"
@@ -52,6 +56,17 @@ func (r *BlueBerry) GetEcho(cfg *Config) (*echo.Echo, error) {
 		if cfg.HealthCheckPath != "" {
 			healthCheckPath = cfg.HealthCheckPath
 		}
+	}
+
+	r.interfaceConfig = InterfaceConfig{
+		WebUIPath:       webPath,
+		APIPath:         apiPath,
+		HealthCheckPath: healthCheckPath,
+	}
+
+	e, err := r.setupCore(&r.interfaceConfig)
+	if err != nil {
+		return nil, err
 	}
 
 	// Setup Web UI routes
@@ -121,7 +136,7 @@ func (r *BlueBerry) setupAPIRoutes(api *echo.Group) {
 // @Success 200 {object} string "API server started"
 // @Router / [get]
 func (r *BlueBerry) RunAPI(port string) error {
-	e, err := r.GetEcho(&Config{})
+	e, err := r.GetEcho(&InterfaceConfig{})
 	if err != nil {
 		return err
 	}

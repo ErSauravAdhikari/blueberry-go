@@ -46,7 +46,7 @@ func (r *BlueBerry) webAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		cookie, err := c.Cookie("auth")
 		if err != nil || cookie.Value != "authenticated" {
-			return c.Redirect(http.StatusFound, "/login")
+			return c.Redirect(http.StatusFound, r.interfaceConfig.getURLForPath("/login"))
 		}
 		return next(c)
 	}
@@ -70,7 +70,7 @@ func (r *BlueBerry) handleLogin(c echo.Context) error {
 		cookie.Value = "authenticated"
 		cookie.Expires = time.Now().Add(24 * time.Hour)
 		c.SetCookie(cookie)
-		return c.Redirect(http.StatusFound, "/")
+		return c.Redirect(http.StatusFound, r.interfaceConfig.getWebUIBasePathParsed())
 	}
 
 	// If authentication fails, pass an error message to the template
@@ -302,7 +302,7 @@ func (r *BlueBerry) cancelExecutionByIDWeb(c echo.Context) error {
 		return c.Render(http.StatusNotFound, "error.html", map[string]string{"error": err.Error()})
 	}
 
-	return c.Redirect(http.StatusSeeOther, fmt.Sprintf("/execution/%d", taskRunID))
+	return c.Redirect(http.StatusSeeOther, r.interfaceConfig.getURLForPath(fmt.Sprintf("/execution/%d", taskRunID)))
 }
 
 // executeTaskForm renders the form for executing a task
@@ -366,5 +366,5 @@ func (r *BlueBerry) handleExecuteTask(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.Redirect(http.StatusFound, fmt.Sprintf("/execution/%d", taskID))
+	return c.Redirect(http.StatusFound, r.interfaceConfig.getURLForPath(fmt.Sprintf("/execution/%d", taskID)))
 }

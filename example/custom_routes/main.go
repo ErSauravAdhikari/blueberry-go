@@ -143,6 +143,8 @@ func main() {
 
 	bb := blueberry.NewBlueBerryInstance(db)
 
+	bb.AddWebOnlyPasswordAuth("admin", "password")
+
 	// Define task schema
 	taskSchema := blueberry.NewTaskSchema(blueberry.TaskParamDefinition{
 		"message": blueberry.TypeString,
@@ -160,7 +162,7 @@ func main() {
 	scheduleHandler.RegisterTask("simple_task", simpleTask1)
 
 	// Get Echo instance with custom configuration
-	e, err := bb.GetEcho(&blueberry.Config{
+	e, err := bb.GetEcho(&blueberry.InterfaceConfig{
 		WebUIPath: "/admin",
 		APIPath:   "/api/v1",
 	})

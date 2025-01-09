@@ -25,6 +25,12 @@ type Task struct {
 	schema    TaskSchema
 }
 
+type InterfaceConfig struct {
+	WebUIPath       string // base path for web UI routes (e.g., "/bb_admin")
+	APIPath         string // base path for API routes (e.g., "/bb_api")
+	HealthCheckPath string // base path for Healthcheck endpoint (e.g. "/healthcheck")
+}
+
 type BlueBerry struct {
 	db      DB
 	cron    *cron.Cron
@@ -39,6 +45,8 @@ type BlueBerry struct {
 	apiKeysMux       sync.RWMutex
 	usersMux         sync.RWMutex
 	webOnlyPasswords map[string]string
+
+	interfaceConfig InterfaceConfig
 }
 
 func NewBlueBerryInstance(db DB) *BlueBerry {

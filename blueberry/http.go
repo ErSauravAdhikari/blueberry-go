@@ -42,7 +42,7 @@ func (r *BlueBerry) setupCore(cfg *InterfaceConfig) (*echo.Echo, error) {
 func (r *BlueBerry) GetEcho(cfg *InterfaceConfig) (*echo.Echo, error) {
 
 	// Default paths if not specified
-	webPath := "/"
+	webPath := ""
 	apiPath := "/api"
 	healthCheckPath := "/health"
 
@@ -69,7 +69,6 @@ func (r *BlueBerry) GetEcho(cfg *InterfaceConfig) (*echo.Echo, error) {
 		return nil, err
 	}
 
-	// Setup Web UI routes
 	webGroup := e.Group(webPath)
 	r.setupWebRoutes(webGroup)
 
